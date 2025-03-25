@@ -1,5 +1,5 @@
 # RetroInsta - A Day One Instagram Clone
-RetroInsta aims to replicate Instagram's initial feature set. Users can log in with their Google Accounts, post a photo with a filter applied, like other user's posts, follow other accounts, see a feed of posts they follow, and see an explore page which features popular posts site-wide.
+RetroInsta aims to replicate Instagram's initial feature set. Users can log in with their Google Accounts, post a photo with a filter applied, like other user's posts, follow other accounts, see a feed of posts from accounts they follow, and see an explore page which features popular posts site-wide.
 
 ## How to build and run   
 - Install Docker. The easiest way is to install [Docker Desktop](https://docs.docker.com/desktop/).
