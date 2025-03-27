@@ -13,4 +13,3 @@ Link to our Trello project board [here](https://trello.com/b/E8lh6y8I/retroinsta
 
 ## How to contribute
 Fork this project and make a pull request.
-t
