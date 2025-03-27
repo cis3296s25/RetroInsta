@@ -1,5 +1,6 @@
 services:
   front-end:
+    container_name: front-end
     build:
       context: ./front-end  # Path to the front-end directory
       dockerfile: Dockerfile
