@@ -1,0 +1,44 @@
+/* src/components/Navbar.css */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: #333;
+    color: white;
+    z-index: 1000; /* Ensure it stays above other content */
+  }
+  
+  .navbar-logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+  
+  .navbar-links {
+    list-style: none;
+    display: flex;
+    gap: 1rem;
+    padding-right: 5cqmax;
+  }
+  
+  .navbar-links a {
+    color: white;
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  
+  .navbar-links a:hover {
+    color: #ddd;
+  }
+  
+  /* Add some padding to the body to prevent content 
+  * from being hidden under the navigation bar, 
+  * and adjust based on the navigation bar height */
+  body {
+    padding-top: 60px; 
+  }
+  
