@@ -10,13 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-<<<<<<< Updated upstream
     "axios": "^1.8.4",
-=======
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.0",
-    "@mui/material": "^7.0.0",
->>>>>>> Stashed changes
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

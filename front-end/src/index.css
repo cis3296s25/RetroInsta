@@ -5,7 +5,7 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: rgba(242, 210, 178, 0.87);
+  background-color: #242424;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -25,48 +25,14 @@ a:hover {
 body {
   margin: 0;
   display: flex;
-  flex-direction: column; /* Stack content vertically */
-  justify-content: center; /* Center items vertically */
-  align-items: center;     /* Center items horizontally */
+  place-items: center;
   min-width: 320px;
-  min-height: 100vh;       /* Ensure full height */
-  background-color: rgba(217, 187, 178, 0.87);
-}
-
-.username{
-  color: black;
-}
-
-.post-content{
-  color: black;
-}
-/* Container for the camera icon */
-.cameraicon {
-  width: 40px;  /* Set the container size */
-  height: 40px;
-  display: inline-block; /* Makes it align with other inline content */
-}
-
-/* Styling for the camera icon */
-.camera-icon {
-  width: 100%;  /* Ensures the image fits the container */
-  height: 100%; 
-  object-fit: contain;
-}
-
-
-.App {
-  width: 100%;
-  max-width: 800px; /* Optional: Set max width for the content */
-  padding: 20px;
-  box-sizing: border-box;
-  text-align: center;  /* Center text horizontally */
+  min-height: 100vh;
 }
 
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
-  margin-bottom: 20px; /* Add space between the title and the feed */
 }
 
 button {
