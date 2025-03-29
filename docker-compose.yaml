@@ -11,20 +11,6 @@ services:
       - /app/node_modules  # Avoids overwriting node_modules inside the container
     environment:
       - CHOKIDAR_USEPOLLING=true  # Ensures file change detection works in Docker
-
-  minio:
-    image: quay.io/minio/minio
-    container_name: minio
-    restart: unless-stopped
-    ports:
-      - "9000:9000" # MinIO API
-      - "9001:9001" # MinIO Console
-    volumes:
-      - ./minio/data:/data
-    environment:
-      MINIO_ROOT_USER: RetroInstaRootUser
-      MINIO_ROOT_PASSWORD: V7t#rP@zB9w!qQ2y$6E
-    command: server /data --console-address ":9001"
     
   nodejs:   # Node (backend) service 
     image: server:1.0.0
@@ -41,6 +27,7 @@ services:
       - /nodejs/node_modules  # Avoids overwriting node_modules inside the container
     depends_on:
       - mongo
+  
   mongo:    # User Database service
     image: mongo:latest
     container_name: ${DATABASE_HOST}
@@ -49,9 +36,22 @@ services:
     env_file: .env
     volumes:
       - database-v:/data/db
+  
+  minio:
+    container_name: minio
+    build:
+      context: ./minio
+    restart: unless-stopped
+    ports:
+      - "9000:9000" # MinIO API
+      - "9001:9001" # MinIO Console
+    volumes:
+      - minio-data:/data
 
 volumes:
   server-v-node-modules:
     name: "server-v-node-modules"
   database-v:
     name: "database-v"
+  minio-data:
+    name: "minio-data"

@@ -1,0 +1,3 @@
+# MinIO system files
+data/.minio.sys/
+.DS_Store 
