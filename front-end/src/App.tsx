@@ -1,6 +1,12 @@
 import './App.css';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar/Navbar";
 import PostFeed from "./components/PostFeed/PostFeed";
+import Footer from "./components/Footer";
+import Explore from "./pages/Explore";
+import Profile from "./pages/Profile";
+import PostPage from "./pages/PostPage";
 import { useEffect, useState } from "react";
 import { Post } from "./models/Post"
 import { GoogleOAuthProvider } from '@react-oauth/google';
@@ -55,8 +61,15 @@ function App() {
 
   return (
     <GoogleOAuthProvider clientId={googleClientId}>
-      <div className="App">
+       <Router>
         <Navbar />
+        <main style={{ paddingTop: "64px", textAlign: "center" }}>
+          <Routes>
+           {/* Home Route (Default) */}
+            <Route path="/" element={
+
+        <div className="App">
+  
         <div className="post-form">
         <h2>Create a Post</h2>
           <form onSubmit={handleSubmit}>
@@ -67,10 +80,20 @@ function App() {
             <button type="submit">Post</button>
           </form>
         </div>
+
         <div className="Posts">
           {loading ? <p>Loading posts...</p> : <PostFeed posts={posts} />}
         </div>
-      </div>
+        </div>
+         } />
+         {/* Other Pages */}
+         <Route path="/explore" element={<Explore />} />
+         <Route path="/post" element={<PostPage />} />
+         <Route path="/profile" element={<Profile />} />
+       </Routes>
+       </main>
+        <Footer />
+      </Router>
     </GoogleOAuthProvider>
   );
 }

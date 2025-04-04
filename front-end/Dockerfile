@@ -8,6 +8,12 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm install --frozen-lockfile
 
+# Install react-oauth, react-router and mui material packages
+RUN npm install @react-oauth/google
+RUN npm install react-router-dom @types/react-router-dom
+RUN npm install @mui/material @mui/icons-material @emotion/react @emotion/styled
+
+
 # Copy the rest of the app's source code
 COPY . .
 
