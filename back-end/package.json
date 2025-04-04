@@ -12,8 +12,11 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "axios": "^1.8.4",
+    "minio": "^8.0.5",
     "mongodb": "^6.15.0",
     "mongoose": "^8.13.1",
+    "multer": "^1.4.5-lts.2",
     "ronin-mocks": "^0.1.11",
     "ronin-server": "^0.1.3"
   }

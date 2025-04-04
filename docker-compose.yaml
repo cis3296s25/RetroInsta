@@ -16,7 +16,6 @@ services:
       
     
   back-end:   # Node server 
-    image: server:1.0.0
     container_name: back-end
     ports:
       - ${SERVER_PORT}:${SERVER_PORT}
@@ -38,7 +37,7 @@ services:
     env_file: .env
     volumes:
       - database-v:/data/db
-
+      
   minio:
     container_name: minio
     build:
