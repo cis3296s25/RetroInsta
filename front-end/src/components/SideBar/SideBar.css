@@ -2,13 +2,15 @@
     position: fixed;
     top: 60px;
     left: 0;
-    width: 250px; 
+    width: 200px; 
     height: 100vh; /* Full height of the viewport */
     background-color: #333; /* Dark gray background */
     border-right: 1px solid #ccc; /* Optional border for separation */
     padding: 20px;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Optional shadow for depth */
     overflow-y: auto; /* Enable scrolling if content overflows */
+    transition: width 0.3s ease;
+    z-index: 1000;
 }
 
 .sidebar-title {
@@ -19,13 +21,14 @@
 
 .sidebar-menu {
     list-style: none;
-    padding: 50;
+    padding: 0;
     margin: 0;
 }
 
 .sidebar-item {
-    margin-top: 2rem;
-    margin-bottom: 2rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    position: relative;
 }
 
 .sidebar-link {
@@ -36,12 +39,124 @@
     color: #ffffff;
     font-size: 2rem;
     transition: color 0.3s;
+    padding: 10px;
+    border-radius: 8px;
 }
 
 .sidebar-icon {
     font-size: 1.5rem; /* Adjust icon size */
+    min-width: 24px;
+    text-align: center;
 }
 
 .sidebar-link:hover {
     color: #ccc; /* Darker grey on hover */
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-link span {
+    transition: opacity 0.3s ease;
+}
+
+/* Tooltip styles */
+.sidebar-item .tooltip {
+    visibility: hidden;
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #333;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1000;
+    margin-left: 10px;
+}
+
+.sidebar-item .tooltip::after {
+    content: "";
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent #333 transparent transparent;
+}
+
+.sidebar-item:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Responsive styles */
+@media screen and (max-width: 900px) {
+    .sidebar {
+        width: 50px;
+        padding: 20px 5px;
+    }
+
+    .sidebar-link span {
+        opacity: 0;
+        width: 0;
+        overflow: hidden;
+    }
+
+    .sidebar-link {
+        justify-content: center;
+        gap: 0;
+    }
+
+    .sidebar-title {
+        display: none;
+    }
+}
+
+/* Login Popup Styles */
+.login-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.login-popup-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+    text-align: center;
+    position: relative;
+    z-index: 10000;
+}
+
+.login-popup-content h3 {
+    margin-top: 0;
+    color: #333;
+}
+
+.login-popup-content p {
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
 }

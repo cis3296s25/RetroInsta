@@ -5,7 +5,7 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: rgba(242, 210, 178, 0.87);
+  background-color: #FAF3E0;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -30,8 +30,7 @@ body {
   align-items: center;     /* Center items horizontally */
   min-width: 320px;
   min-height: 100vh;       /* Ensure full height */
-  background-color: rgba(217, 187, 178, 0.87);
-}
+  background-color: #FAF3E0;
 
 .username{
   color: black;

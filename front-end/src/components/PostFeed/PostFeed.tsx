@@ -7,7 +7,7 @@ import { User } from "../../models/User";
 interface PostFeedProps {
   posts: DisplayPost[];
   appUser: User | null;
-  userCache?:React.MutableRefObject<Record<string, User>>;
+  userCache?:React.RefObject<Record<string, User>>;
 }
 
 const Feed: React.FC<PostFeedProps> = ({ posts, appUser, userCache }) => {

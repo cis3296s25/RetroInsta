@@ -1,8 +1,9 @@
 import './App.css';
 import Navbar from "./components/Navbar/Navbar";
 import PostFeed from "./components/PostFeed/PostFeed";
-import CreatePostForm from "./components/CreatePostForm/CreatePostForm";
+import CreatePostPopup from "./components/CreatePostPopup/CreatePostPopup";
 import SideBar from "./components/SideBar/SideBar";
+import Profile from "./pages/Profile";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DisplayPost, BackendPost } from "./models/Post"
 import { CreatePostPayload, PostFormData } from './models/CreatePostData';
@@ -12,6 +13,7 @@ import { User } from './models/User';
 import { createPost, getAllPosts } from './api/posts';
 import { loginWithGoogleApi as loginWithGoogle } from './api/auth';
 import { getUserById, getUserById as getUserDataById } from './api/users';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 const LOCAL_STORAGE_USER_ID_KEY = 'user_id'
 
@@ -25,7 +27,7 @@ function App() {
   const [postsLoading, setPostsLoading] = useState(true);
   const [appUser, setAppUser] = useState<User | null>(null)
   const [authLoading, setAuthLoading] = useState(false)
-  const [isCreatePostFormVisible, setIsCreatePostFormVisible] = useState(false);
+  const [isCreatePostPopupOpen, setIsCreatePostPopupOpen] = useState(false);
 
   const userCache = useRef<Record<string, User>>({});
 
@@ -204,8 +206,8 @@ function App() {
 
   
   // create a post
-  const toggleCreatePostForm = () => {
-    setIsCreatePostFormVisible(currentVisibility => !currentVisibility);
+  const toggleCreatePostPopup = () => {
+    setIsCreatePostPopupOpen(prev => !prev);
   };
   
   const handleCreatePostSubmit = useCallback(async (formData: PostFormData) => {
@@ -231,10 +233,9 @@ function App() {
     
     try {
       const createdPost = await createPost(payload);
-      
       await fetchAndProcessPosts(); // refresh posts after creating a new one
       console.log("Post created successfully:", createdPost);
-      setIsCreatePostFormVisible(false); // Hide the form after submission
+      setIsCreatePostPopupOpen(false); // Close the popup after successful post
     } catch (error) {
       console.error("Error creating post:", error);
       alert("Failed to create post.");
@@ -248,10 +249,18 @@ function App() {
     restoreUserSession();
   }, [restoreUserSession]); // Run only when restoreUserSession identity changes
   
+
+
+
   return (
     <GoogleOAuthProvider clientId={googleClientId}>
       <div className="App">
-      <SideBar />
+        <SideBar 
+          currentUser={appUser} 
+          onAddPostClick={toggleCreatePostPopup}
+          onLoginSuccess={handleLoginSuccess}
+          onLoginError={handleLoginError}
+        />
         {/* Main content is wrapped in a container with left margin to avoid overlap with the fixed sidebar */}
         <div className="main-content" style={{ marginLeft: '220px', padding: '20px' }}>
         <Navbar 
@@ -260,11 +269,9 @@ function App() {
           onLoginSuccess={handleLoginSuccess}
           onLoginError={handleLoginError}
           onLogout={handleLogout}
-          onToggleCreatePostForm={toggleCreatePostForm}
           />
-        {isCreatePostFormVisible && (
-          <CreatePostForm onPostSubmit={handleCreatePostSubmit} />
-        )}
+        <Routes>
+        <Route path="/" element={
         <div className="Posts">
           {postsLoading ? <p>Loading posts...</p> : 
           <PostFeed 
@@ -273,7 +280,15 @@ function App() {
             userCache={userCache}
             />}
         </div>
+         } />
+              <Route path="/profile/:userId" element={<Profile userCache={userCache} />} />
+        </Routes>
       </div>
+      <CreatePostPopup 
+            isOpen={isCreatePostPopupOpen}
+            onClose={toggleCreatePostPopup}
+            onPostSubmit={handleCreatePostSubmit}
+            />
       </div>
     </GoogleOAuthProvider>
   );

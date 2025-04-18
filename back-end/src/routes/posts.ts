@@ -54,6 +54,18 @@ router.post('/', upload.single("imagePath"), async (req: Request, res: Response)
   }
 });
 
+// GET /api/posts/user/:userId
+router.get('/user/:userId', async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+    const posts: IPost[] = await Post.find({ authorID: userId }).sort({ createdAt: -1 });
+    res.json(posts);
+  } catch (error: any) {
+    console.error("Error fetching user's posts:", error);
+    res.status(500).json({ error: "Internal server error fetching user's posts" });
+  }
+});
+
 // TODO: add get, put routes for posts
 
 export default router;

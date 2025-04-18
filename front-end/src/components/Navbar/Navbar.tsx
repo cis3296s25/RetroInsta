@@ -10,20 +10,16 @@ interface NavbarProps {
   onLoginSuccess: (decodedToken: GoogleIdTokenPayload, credentialResponse: CredentialResponse) => void;
   onLoginError: () => void;
   onLogout: () => void;
-  onToggleCreatePostForm: () => void;
 }
 
 export default function Navbar({
   user,
-  authLoading,
   onLoginSuccess,
   onLoginError,
   onLogout,
-  onToggleCreatePostForm,
-}: NavbarProps 
-) {
+}: NavbarProps) {
   return (
-  <nav className="navbar">
+    <nav className="navbar">
       <div className="navbar-logo">
         <img 
           src="/insta.png" 
@@ -39,14 +35,6 @@ export default function Navbar({
             {/* Make username a list item */}
             <li className="navbar-item">
               <span className="user-greeting">{user?.username}</span>
-            </li>
-            <li className="navbar-item"> {/* Item for Make Post button */}
-              <button
-                onClick={onToggleCreatePostForm}
-                className="navbar-button make-post-button"
-              >
-                Make a Post
-              </button>
             </li>
             {/* Remove the extra div around the logout button */}
             <li className="navbar-item"> {/* Item for Logout button */}
