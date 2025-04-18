@@ -1,0 +1,80 @@
+services:
+  backend-test: # Renamed to avoid conflict if main backend is running
+    container_name: backend-test
+    build:
+      context: ./back-end
+      target: builder # Build dev stage if you have one, or just use the final stage
+      # You might need different build args for tests if applicable
+    env_file: .env.test # Use a dedicated test environment file
+    environment:
+      - NODE_ENV=test
+      # Override DB/Minio connection details to point to test services below
+      - MONGO_HOST=mongo-test
+      - MONGO_PORT=27017
+      - MONGO_DB=testdb # Use a dedicated test database name
+      - MINIO_ENDPOINT=minio-test
+      - MINIO_PORT=9000
+      - MINIO_ACCESS_KEY=minio_test_access_key # Use test credentials
+      - MINIO_SECRET_KEY=minio_test_secret_key # Use test credentials
+      - MINIO_BUCKET=testbucket # Use a dedicated test bucket
+      - SERVER_PORT=7006 # Optional: Use a different port if needed
+      # Keep other necessary env vars from your .env if required
+    depends_on:
+      mongo-test:
+        condition: service_healthy # Wait for Mongo to be ready
+      minio-test:
+        condition: service_healthy # Wait for Minio to be ready
+    # Expose port if you want to hit it from host, not strictly needed if tests run inside docker
+    # ports:
+    #  - "7006:7006"
+    networks:
+      - testnet
+
+  mongo-test:
+    container_name: mongo-test
+    image: mongo:6 # Use a specific version
+    ports:
+      - "27018:27017" # Expose test mongo on host port 27018 (optional, for debugging)
+    volumes:
+      - mongo-test-data:/data/db
+    environment:
+      # No specific env needed for basic Mongo, unless using auth
+      MONGO_INITDB_DATABASE: testdb # Creates the db if it doesn't exist
+    healthcheck:
+        test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/testdb --quiet
+        interval: 5s
+        timeout: 3s
+        retries: 5
+        start_period: 5s
+    networks:
+      - testnet
+
+  minio-test:
+    container_name: minio-test
+    image: minio/minio:latest
+    ports:
+      - "9002:9000" # API port on host 9002
+      - "9003:9001" # Console port on host 9003
+    volumes:
+      - minio-test-data:/data
+    environment:
+      - MINIO_ROOT_USER=minio_test_access_key # Match backend env var
+      - MINIO_ROOT_PASSWORD=minio_test_secret_key # Match backend env var
+      # Optional: Set default bucket if needed via mc commands in entrypoint/command,
+      # but the backend code already tries to create it.
+    command: server /data --console-address ":9001"
+    healthcheck:
+        test: ["CMD", "mc", "ready", "local"]
+        interval: 5s
+        timeout: 3s
+        retries: 5
+        start_period: 5s
+    networks:
+      - testnet
+
+volumes:
+  mongo-test-data: # Use separate volume for test data
+  minio-test-data:
+
+networks:
+  testnet:

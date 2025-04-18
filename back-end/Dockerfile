@@ -9,6 +9,8 @@ RUN npm ci
 
 # Copy tsconfig and source code
 COPY tsconfig.json ./
+COPY jest.config.js ./
+COPY tsconfig.test.json ./
 COPY src ./src
 
 # Build the TypeScript code

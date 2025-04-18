@@ -21,7 +21,7 @@ export async function storeImage(imgFile: any) {
     const fileBuffer = imgFile.buffer;
 
     // Generate the presigned URL using the unique filename
-    const presignedUrlResponse = await axios.post("http://localhost:7005/api/generate-presigned-url", {
+    const presignedUrlResponse = await axios.post(`http://${SERVER_HOST}:${SERVER_PORT}/api/generate-presigned-url`, {
       filename: uniqueFilename,
       fileType,
     });

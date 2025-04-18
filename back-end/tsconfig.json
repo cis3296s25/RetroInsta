@@ -1,4 +1,3 @@
-// tsconfig.json
 {
     "compilerOptions": {
       /* Base Options */
@@ -18,10 +17,8 @@
   
       /* Module Resolution Options */
       "resolveJsonModule": true,             // Allow importing .json files
-  
-      /* Advanced Options */
-      // "baseUrl": "./",                    // Optional: Base directory for non-relative module imports
-      // "paths": {},                        // Optional: Path mapping for module imports
+
+      "isolatedModules": true
     },
     "include": ["src/**/*"],                // Which files TypeScript should compile
     "exclude": ["node_modules", "dist"]     // Which files/directories to ignore

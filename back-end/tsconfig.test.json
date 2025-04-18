@@ -1,0 +1,23 @@
+// back-end/tsconfig.test.json
+{
+    "extends": "./tsconfig.json", // Inherit all settings from your main config
+    "compilerOptions": {
+      // Re-affirm settings ts-jest might be sensitive to
+      "module": "NodeNext",
+      "moduleResolution": "NodeNext",
+      "target": "ES2020",
+      "isolatedModules": true,
+      "esModuleInterop": true,
+      // Allow JS files in case dependencies need processing during tests
+      "allowJs": true
+    },
+    // Make sure this config knows about the test files too
+    "include": [
+      "src/**/*",
+      "tests/**/*" // Add the tests directory here
+    ],
+    "exclude": [
+      "node_modules",
+      "dist"
+    ]
+  }

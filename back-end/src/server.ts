@@ -6,7 +6,7 @@ import http from 'http'; // Import http to type the 'server' variable if needed
 import { SERVER_PORT, SERVER_HOST, API_BASE_PATHS } from './config/config.js'; // Use index.js
 
 // Import database functions - Assuming seed.js is now in database/
-import { connectDB } from './database/database.js';
+import { connectDB, disconnectDB } from './database/database.js';
 import { initializeData } from './database/seed.js'; // Correct path
 
 // Import routers
@@ -52,24 +52,24 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 });
 
 // --- Start Server Function ---
-const startServer = async () => {
-  let server: http.Server | undefined;
+let server: http.Server | undefined;
+
+export const startServer = async () => {
   try {
     await connectDB();
 
+    // Always start listening
     server = app.listen(SERVER_PORT, () => {
       console.log(`Server running on http://${SERVER_HOST}:${SERVER_PORT}`);
 
-      if (process.env.NODE_ENV !== 'production' || process.env.SEED_DB === 'true') {
+      const shouldSeed = process.env.SEED_DB === 'true' ||
+                         (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test');
+
+      if (shouldSeed) {
         console.log("🌱 Seeding conditions met. Starting data initialization...");
-        (async () => {
-          try {
-            await initializeData();
-            console.log("Data initialization finished successfully.");
-          } catch (seedError) {
-            console.error("Error during data initialization:", seedError);
-          }
-        })();
+        initializeData().catch(seedError => { // Call async IIFE immediately
+          console.error("Error during data initialization:", seedError);
+        });
       } else {
         console.log("Skipping data initialization based on environment settings.");
       }
@@ -80,14 +80,15 @@ const startServer = async () => {
         process.exit(1);
     });
 
+    // --- Signal handling ---
     const signals: NodeJS.Signals[] = ['SIGINT', 'SIGTERM', 'SIGQUIT'];
     signals.forEach((signal) => {
       process.on(signal, async () => {
         console.log(`\n${signal} received. Shutting down gracefully...`);
-        // Implement your shutdown logic here, e.g., close server, disconnect DB
-        server?.close(async () => { // Use server variable
+        server?.close(async () => {
           console.log('HTTP server closed.');
-          // await disconnectDB(); // Call disconnectDB if you have it
+          await disconnectDB(); // Disconnect DB after server closes
+          console.log('MongoDB disconnected.');
           process.exit(0);
         });
         // Add timeout for forceful shutdown if needed
@@ -104,4 +105,36 @@ const startServer = async () => {
   }
 };
 
-startServer();
+export const shutdown = async () => {
+  console.log('Attempting graceful shutdown...');
+  await new Promise<void>(async (resolve, reject) => {
+    if (server) {
+      server.close(async (err) => {
+        if (err) {
+          console.error('Error closing HTTP server:', err);
+          return reject(err);
+        }
+        console.log('HTTP server closed.');
+        await disconnectDB(); // Disconnect DB after server closes
+        resolve();
+      });
+    } else {
+      await disconnectDB(); // Disconnect DB if server wasn't started
+      resolve();
+    }
+  });
+  console.log('Shutdown complete.');
+};
+
+// Call startServer only if this file is run directly (e.g., `node dist/server.js`)
+// This prevents auto-starting when imported (like by Supertest).
+// Docker compose `run` will execute the default CMD, which *will* run this.
+if (import.meta.url === `file://${process.argv[1]}`) { // Check if run directly
+  console.log("Server file executed directly. Starting server...");
+  startServer();
+} else {
+  console.log("Server file imported. Skipping automatic server start.");
+}
+
+
+export default app // for testing
