@@ -1,17 +1,11 @@
-import mongoose from 'mongoose';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import axios from 'axios';
 import FormData from 'form-data';
-
-import {
-    POSTS_COLLECTION,
-    USERS_COLLECTION,
-    SERVER_HOST,
-    SERVER_PORT,
-    API_BASE_PATHS
-} from '../config/config.js';
+import { v4 as uuidv4 } from 'uuid';
+import { s3Client, BUCKET, STORAGE_PUBLIC_HOST, SERVER_HOST, SERVER_PORT, API_BASE_PATHS, POSTS_COLLECTION, USERS_COLLECTION } from '../config/config.js'; // Import S3/Server config
+import { PutObjectCommand } from '@aws-sdk/client-s3';
 
 import Post, { IPost } from '../models/Post.js';
 import User, { IUser } from '../models/User.js';
@@ -30,7 +24,8 @@ const seedPostViaRoute = async (
     postIndex: number
 ): Promise<void> => {
     const imageFilePath = path.join(SEED_IMAGES_DIR, imageFilename);
-    const targetUrl = `http://${SERVER_HOST}:${SERVER_PORT}${API_BASE_PATHS.POSTS}`;
+    // Ensure SERVER_HOST and SERVER_PORT are correctly read from config/env
+    const targetUrl = `http://${SERVER_HOST || 'localhost'}:${SERVER_PORT}${API_BASE_PATHS.POSTS}`;
     const description = `Post #${postIndex + 1} by ${authorUsername}.`;
 
     console.log(`[Seed Post Route] Processing: Author ${authorId}, Image ${imageFilename} -> POST ${targetUrl}`);
@@ -43,7 +38,7 @@ const seedPostViaRoute = async (
         const formData = new FormData();
         formData.append('authorID', authorId);
         formData.append('description', description);
-        formData.append('likes', likes);
+        formData.append('likes', String(likes)); // Ensure likes is string for FormData if needed
         formData.append('imagePath', fileBuffer, {
             filename: imageFilename,
             contentType: fileType
@@ -73,41 +68,62 @@ const seedPostViaRoute = async (
              console.error("Error Message:", error.message);
              console.error("Error Stack:", error.stack);
         }
-        throw new Error(`Failed to seed post #${postIndex + 1} via route: ${error.message}`);
     }
 };
 
-// --- Helper Function to Upload User Profile Image ---
-const uploadUserProfileImageViaRoute = async (filename: string): Promise<string> => {
-    const filePath = path.join(SEED_IMAGES_DIR, filename);
-    const targetUrl = `http://${SERVER_HOST}:${SERVER_PORT}/upload-with-presigned-url`;
-    // console.log(`[Seed User Image Upload] Processing image: ${filename} -> PUT ${targetUrl}`);
+// --- Helper Function to Upload Seed Image DIRECTLY using S3 SDK ---
+const uploadSeedImageDirectly = async (filename: string): Promise<string> => {
+    const imageFilePath = path.join(SEED_IMAGES_DIR, filename);
+    console.log(`[Seed Direct Upload] Processing: ${filename}`);
+
+    if (!BUCKET) {
+        console.error("[Seed Direct Upload] BUCKET environment variable is not set.");
+        // Return a placeholder or throw, depending on desired behavior
+        return `https://via.placeholder.com/150/FF0000/FFFFFF/?text=NoBucket`;
+        // throw new Error("[Seed Direct Upload] BUCKET environment variable is not set.");
+    }
+
     try {
-        await fs.access(filePath);
-        const fileBuffer = await fs.readFile(filePath);
+        await fs.access(imageFilePath);
+        const fileBuffer = await fs.readFile(imageFilePath);
         const fileType = path.extname(filename).toLowerCase() === '.png' ? 'image/png' : 'image/jpeg';
 
-        const formData = new FormData();
-        formData.append('filename', filename);
-        formData.append('fileType', fileType);
-        formData.append('file', fileBuffer, { filename: filename, contentType: fileType });
+        // Create a unique key for S3/Minio
+        const originalFilename = path.basename(filename);
+        // Basic sanitization
+        const sanitizedFilename = originalFilename.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+        const uniqueId = uuidv4();
+        const extension = path.extname(sanitizedFilename);
+        const baseName = path.basename(sanitizedFilename, extension);
+        // Add a prefix to distinguish seed images if desired
+        const objectKey = `seed-profiles/${uniqueId}-${baseName}${extension}`;
 
-        const response = await axios.put(targetUrl, formData, {
-            headers: { ...formData.getHeaders() },
-            maxBodyLength: Infinity, maxContentLength: Infinity
+        console.log(`[Seed Direct Upload] Uploading '${objectKey}' to bucket '${BUCKET}'`);
+
+        const putCommand = new PutObjectCommand({
+            Bucket: BUCKET,
+            Key: objectKey,
+            Body: fileBuffer,
+            ContentType: fileType,
         });
 
-        if (response.status === 200 && response.data?.viewUrl) {
-            // console.log(`[Seed User Image Upload] Successfully uploaded ${filename}, URL: ${response.data.viewUrl}`);
-            return response.data.viewUrl;
-        } else {
-             console.error(`[Seed User Image Upload] Upload for ${filename} failed or response missing 'viewUrl': Status ${response.status}`, response.data);
-            throw new Error(`User profile image upload for ${filename} failed.`);
+        await s3Client.send(putCommand);
+
+        // Construct the public URL using STORAGE_PUBLIC_HOST from config
+        const viewUrl = `${STORAGE_PUBLIC_HOST}/${BUCKET}/${objectKey}`;
+
+        console.log(`[Seed Direct Upload] Successfully uploaded ${filename}. URL: ${viewUrl}`);
+        return viewUrl;
+
+    } catch (error: any) {
+        console.error(`[Seed Direct Upload] Error uploading profile image ${filename}:`, error.message || error);
+        if (error instanceof Error) {
+             console.error(`[Seed Direct Upload] Error Name: ${error.name}`);
         }
-    } catch (error:any) {
-        console.error(`[Seed User Image Upload] Error uploading profile image ${filename} via PUT route ${targetUrl}:`, error.message);
-         if (axios.isAxiosError(error)) console.error("Axios Error Data:", error.response?.data);
-        throw error;
+        // Return a placeholder on error to allow seeding to potentially continue
+        return `https://via.placeholder.com/150/FF0000/FFFFFF/?text=UploadError`;
+        // Or re-throw if you want seeding to fail hard on upload errors:
+        // throw new Error(`Failed to upload seed image ${filename}: ${error.message}`);
     }
 };
 
@@ -120,12 +136,13 @@ export const initializeData = async (): Promise<void> => {
             await fs.access(SEED_IMAGES_DIR);
             console.log(`[Seed] Found seed image directory: ${SEED_IMAGES_DIR}`);
         } catch (err) {
-            console.error(`❌ Error: Seed image directory not found at ${SEED_IMAGES_DIR}`);
-            throw new Error(`Seed image directory missing: ${SEED_IMAGES_DIR}`);
+            console.error(`❌ Error: Seed image directory not found at ${SEED_IMAGES_DIR}. Cannot seed images.`);
+            // Decide if this is fatal or just prevents image seeding
+             throw new Error(`Seed image directory missing: ${SEED_IMAGES_DIR}`);
         }
 
         // List of base filenames
-        const availableImageFiles = [ 
+        const availableImageFiles = [
             "avatar.jpeg", "bonsai.jpeg", "bridge.jpeg", "man.jpeg", "mountain.jpeg",
             "eye.jpeg", "camera.jpeg", "elephant.jpeg", "hooter.jpeg", "error.png",
             "crash.jpeg", "zion.jpeg", "joshua.jpeg", "goggles.jpeg", "puppy.jpeg",
@@ -136,14 +153,15 @@ export const initializeData = async (): Promise<void> => {
 
         // --- User Initialization ---
         const userCount = await User.countDocuments();
-        let insertedUsers: (IUser & { _id: mongoose.Types.ObjectId })[] = [];
+        let insertedUsers: IUser[] = [];
 
         if (userCount > 0) {
             console.log(`[Seed] Collection '${USERS_COLLECTION}' already populated. Skipping user seeding, fetching existing users.`);
-            insertedUsers = await User.find();
+            // Ensure existing users are fetched correctly if needed for post seeding
+             insertedUsers = await User.find();
         } else {
             console.log(`[Seed] Seeding initial users for '${USERS_COLLECTION}'...`);
-            const initialUserDefs = [ /* Your user definitions */
+            const initialUserDefs = [ // Your user definitions here...
                  { googleId: "abby123", username: "abby123", bio: "I love hiking and nature!" },
                 { googleId: "benny_2000", username: "benny_2000", bio: "Tech enthusiast and software developer." },
                 { googleId: "char1ieIsC00L", username: "char1ieIsC00L", bio: "Just a cool guy who loves coding." },
@@ -173,15 +191,31 @@ export const initializeData = async (): Promise<void> => {
             ];
 
             const usersToInsertPromises = initialUserDefs.map(async (userDef) => {
-                const randomImageFile = availableImageFiles[Math.floor(Math.random() * availableImageFiles.length)];
-                const profilePicUrl = await uploadUserProfileImageViaRoute(randomImageFile);
-                return { ...userDef, profilePicPath: profilePicUrl };
+                try {
+                    const randomImageFile = availableImageFiles[Math.floor(Math.random() * availableImageFiles.length)];
+                    const profilePicUrl = await uploadSeedImageDirectly(randomImageFile);
+                    return { ...userDef, profilePicPath: profilePicUrl };
+                } catch (uploadError) {
+                     console.error(`[Seed] Failed to upload profile picture during user definition for ${userDef.username}:`, uploadError);
+                    return { ...userDef, profilePicPath: 'https://via.placeholder.com/150/CCCCCC/FFFFFF/?text=NoPic' };
+                }
             });
-            const usersToInsert = await Promise.all(usersToInsertPromises);
 
-            console.log('[Seed] Inserting initial user data into MongoDB...');
-            insertedUsers = await User.insertMany(usersToInsert);
-            console.log(`[Seed] ${insertedUsers.length} initial users added.`);
+            // Wait for all uploads/definitions to complete (or fail gracefully)
+            const userResults = await Promise.allSettled(usersToInsertPromises);
+
+            // Filter out any potential rejections if needed, though uploadSeedImageDirectly returns placeholder now
+            const usersToInsert = userResults
+                .filter(result => result.status === 'fulfilled')
+                .map(result => (result as PromiseFulfilledResult<any>).value);
+
+            if (usersToInsert.length > 0) {
+                console.log('[Seed] Inserting initial user data into MongoDB...');
+                insertedUsers = await User.insertMany(usersToInsert) as IUser[];
+                console.log(`[Seed] ${insertedUsers.length} initial users added.`);
+            } else {
+                 console.warn("[Seed] No users could be prepared for insertion. Check upload errors above.");
+            }
         }
 
         // --- Post Initialization ---
@@ -190,7 +224,7 @@ export const initializeData = async (): Promise<void> => {
             console.log(`[Seed] Collection '${POSTS_COLLECTION}' already populated. Skipping post seeding.`);
         } else {
              if (insertedUsers.length === 0) {
-                console.warn("[Seed] No users available. Cannot seed posts.");
+                console.warn("[Seed] No users available (either existed or failed seeding). Cannot seed posts.");
              } else {
                 console.log(`[Seed] Seeding initial posts for '${POSTS_COLLECTION}' via POST /api/posts route...`);
                 const totalPostsToCreate = 100;
@@ -216,12 +250,14 @@ export const initializeData = async (): Promise<void> => {
                 const results = await Promise.allSettled(postCreationPromises);
                 console.log(`[Seed Post Route] Finished executing post creation requests.`);
 
-                const failedCount = results.filter(r => r.status === 'rejected').length;
+                const successfulCount = results.filter(r => r.status === 'fulfilled').length;
+                const failedCount = results.length - successfulCount;
+
                 if (failedCount > 0) {
-                     console.warn(`[Seed Post Route] ${failedCount} out of ${totalPostsToCreate} post seeding requests failed. Check logs above for details.`);
-                } else {
-                     console.log(`[Seed] Successfully seeded ${totalPostsToCreate - failedCount} posts via the /api/posts route.`);
+                     console.warn(`[Seed Post Route] ${failedCount} out of ${results.length} post seeding requests failed. Check logs above for details.`);
                 }
+                console.log(`[Seed] Successfully attempted seeding for ${successfulCount} posts via the /api/posts route.`);
+
              }
         }
         console.log("--- Data Seeding Process Completed ---");
