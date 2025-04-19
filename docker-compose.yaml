@@ -25,6 +25,7 @@ services:
     volumes:
       - ./back-end:/nodejs
       - /nodejs/node_modules
+      - ./back-end/seed-images:/app/seed-images:ro
     depends_on:
       - mongo
       - minio
