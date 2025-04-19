@@ -5,18 +5,9 @@ import { Client as MinioClient } from "minio"; // Keep Minio client for dev setu
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const IS_PRODUCTION = NODE_ENV === 'production';
 
-let MONGO_URI: string | undefined = process.env.MONGO_URI;
-if (!MONGO_URI && !IS_PRODUCTION) {
-    const MONGO_DB = process.env.MONGO_DB;
-    const MONGO_HOST = process.env.MONGO_HOST;
-    const MONGO_PORT = process.env.MONGO_PORT;
-    if (MONGO_DB && MONGO_HOST && MONGO_PORT) {
-        console.warn("[Config] MONGO_URI not set, constructing from MONGO_HOST/PORT/DB for local dev.");
-        MONGO_URI = `mongodb://${MONGO_HOST}:${MONGO_PORT}/${MONGO_DB}`;
-    }
-}
+const MONGO_URI = process.env.MONGO_URI;
 if (!MONGO_URI) {
-    console.error("Error: Missing required MongoDB configuration (MONGO_URI, or MONGO_HOST/PORT/DB for local dev)!");
+    console.error("Error: Missing required MongoDB configuration MONGO_URI!");
     process.exit(1);
 }
 export { MONGO_URI };
@@ -63,10 +54,19 @@ let s3Config: ConstructorParameters<typeof S3Client>[0] = {};
 let minioPortNum: number = 9000; // Keep track of the parsed port for local use
 
 if (IS_PRODUCTION) {
+    if (!AWS_REGION) {
+        console.error("Error: Missing required environment variable for production: AWS_REGION");
+        process.exit(1);
+    } 
+    
+    if (!BUCKET) { // Already checked above, but good to be explicit
+        console.error("Error: Missing required environment variable for production: BUCKET");
+        process.exit(1);
+    }
+
     console.log(`[Config] Production mode. Configuring S3 client for AWS region ${AWS_REGION}.`);
     s3Config = {
         region: AWS_REGION,
-        // Credentials provided by App Runner Execution Role
     };
 } else {
     // Local Development targeting Minio
