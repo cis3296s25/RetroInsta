@@ -37,7 +37,7 @@ export const API_BASE_PATHS = {
 
 // --- S3/Minio Configuration ---
 export const BUCKET = process.env.BUCKET; // Use BUCKET from .env
-const AWS_REGION = process.env.AWS_REGION || 'us-east-1'; // Default AWS Region
+const AWS_REGION = process.env.AWS_REGION || 'us-east-2'; // Default AWS Region
 
 // Read Minio connection details directly using your .env variable names
 const MINIO_ENDPOINT = process.env.MINIO_ENDPOINT;
