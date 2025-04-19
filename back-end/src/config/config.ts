@@ -38,13 +38,13 @@ const MINIO_ENDPOINT = process.env.MINIO_ENDPOINT;
 const MINIO_PORT_STR = process.env.MINIO_PORT;
 const MINIO_ACCESS_KEY = process.env.MINIO_ACCESS_KEY;
 const MINIO_SECRET_KEY = process.env.MINIO_SECRET_KEY;
-export const MINIO_BUCKET = process.env.MINIO_BUCKET;
+export const BUCKET = process.env.BUCKET;
 export const MINIO_PUBLIC_HOST = process.env.MINIO_PUBLIC_HOST || `${MINIO_ENDPOINT}:${MINIO_PORT_STR}`;
 
 let MINIO_PORT: number;
 
-if (!MINIO_ENDPOINT || !MINIO_PORT_STR || !MINIO_ACCESS_KEY || !MINIO_SECRET_KEY || !MINIO_BUCKET) {
-  console.error("Error: Missing required Minio environment variables (MINIO_ENDPOINT, MINIO_PORT, MINIO_ACCESS_KEY, MINIO_SECRET_KEY, MINIO_BUCKET)!");
+if (!MINIO_ENDPOINT || !MINIO_PORT_STR || !MINIO_ACCESS_KEY || !MINIO_SECRET_KEY || !BUCKET) {
+  console.error("Error: Missing required Minio environment variables (MINIO_ENDPOINT, MINIO_PORT, MINIO_ACCESS_KEY, MINIO_SECRET_KEY, BUCKET)!");
   process.exit(1);
 }
 
@@ -67,7 +67,7 @@ export const minioClient = new MinioClient({
 
 // --- MinIO Bucket Initialization ---
 (async () => {
-  const bucketName = MINIO_BUCKET;
+  const bucketName = BUCKET;
   const region = process.env.MINIO_REGION || 'us-east-1';
 
   try {

@@ -1,7 +1,7 @@
 import express, { Request, Response, Router } from 'express';
 import multer, { Multer } from 'multer';
 import axios from 'axios'; // Ensure axios is imported
-import { minioClient, MINIO_BUCKET, SERVER_PORT, SERVER_HOST, BACKEND_URL } from '../config/config.js'; // Import necessary config
+import { minioClient, BUCKET, SERVER_PORT, SERVER_HOST, BACKEND_URL } from '../config/config.js'; // Import necessary config
 import { v4 as uuidv4 } from 'uuid';
 
 const router: Router = express.Router();
@@ -63,14 +63,14 @@ router.post('/api/generate-presigned-url', async (req: Request, res: Response) =
       // Generate a pre-signed URL that expires in 24 hours (as per original implicit duration, adjust if needed)
       const expiry = 24 * 60 * 60; // 24 hours
       const presignedUrl = await minioClient.presignedPutObject(
-        MINIO_BUCKET!,
+        BUCKET!,
         objectName,
         expiry
       );
 
       console.log(`Generated presigned PUT URL: ${presignedUrl}`);
 
-      const publicUrl = `http://localhost:9000/${MINIO_BUCKET}/${objectName}`;
+      const publicUrl = `http://localhost:9000/${BUCKET}/${objectName}`;
 
       res.status(200).json({
         presignedUrl, // URL for the client/server to PUT the file to
