@@ -1,6 +1,6 @@
 import express, { Request, Response, Router } from 'express';
 import multer, { Multer } from 'multer';
-import { s3Client, BUCKET, STORAGE_PUBLIC_HOST } from '../config/config.js'; // Import S3 config
+import { IS_PRODUCTION, s3Client, BUCKET, STORAGE_PUBLIC_HOST } from '../config/config.js'; // Import S3 config
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
@@ -46,18 +46,24 @@ export async function storeImage(imgFile: Express.Multer.File): Promise<string> 
             Key: objectKey,
             Body: fileBuffer,
             ContentType: fileType,
-            // ACL: 'public-read' // Optional: Set ACL if bucket policy allows and you need public reads without signed URLs
-                                // Generally better to manage permissions via bucket policy or IAM roles.
         });
 
         const uploadResult = await s3Client.send(putCommand);
         console.log("[Upload] S3 SDK upload result:", uploadResult); // Log result for debugging
 
-        // Construct the public URL
-        // NOTE: This assumes the object/bucket is publicly readable OR you handle access differently.
-        // For local Minio, it points to localhost:MINIO_PUBLIC_PORT
-        // For AWS S3, it points to the standard S3 URL structure.
-        const viewUrl = `${STORAGE_PUBLIC_HOST}/${BUCKET}/${objectKey}`;
+        let viewUrl: string;
+
+        if (IS_PRODUCTION) {
+            // Production uses S3 virtual-hosted style URL
+            // STORAGE_PUBLIC_HOST = https://<bucket>.s3.<region>.amazonaws.com
+            viewUrl = `${STORAGE_PUBLIC_HOST}/${objectKey}`;
+            console.log(`[Upload] Production URL constructed: ${viewUrl}`);
+        } else {
+            // Development uses MinIO path-style URL for localhost access
+            // STORAGE_PUBLIC_HOST = http://localhost:<minio_port>
+            viewUrl = `${STORAGE_PUBLIC_HOST}/${BUCKET}/${objectKey}`;
+            console.log(`[Upload] Development (MinIO) URL constructed: ${viewUrl}`);
+        }
 
         console.log(`[Upload] File uploaded successfully. URL: ${viewUrl}`);
         return viewUrl;
