@@ -3,7 +3,7 @@ import { Client as MinioClient } from "minio"; // Keep Minio client for dev setu
 
 // --- Environment Setup ---
 const NODE_ENV = process.env.NODE_ENV || 'development';
-const IS_PRODUCTION = NODE_ENV === 'production';
+export const IS_PRODUCTION = NODE_ENV === 'production';
 
 const MONGO_URI = process.env.MONGO_URI;
 if (!MONGO_URI) {
@@ -156,10 +156,8 @@ if (IS_PRODUCTION) {
 export const s3Client = new S3Client(s3Config);
 
 // --- Public URL Construction ---
-// Base URL for accessing uploaded files publicly
 export const STORAGE_PUBLIC_HOST = IS_PRODUCTION
-    ? `https://${BUCKET}.s3.${AWS_REGION}.amazonaws.com` // Standard S3 URL base
-    // Use the Minio port specified in the .env for constructing the public URL
-    : `http://localhost:${minioPortNum}`; // Use parsed minioPortNum
+    ? `https://${BUCKET}.s3.${AWS_REGION}.amazonaws.com` // Correct base for S3 virtual-hosted
+    : `http://localhost:${minioPortNum}`;               // Correct base for Minio local access
 
 console.log(`Configuration loaded successfully. NODE_ENV=${NODE_ENV}`);
