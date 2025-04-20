@@ -7,7 +7,6 @@ RUN npm ci
 COPY . .
 
 ARG VITE_BACKEND_URL
-ARG VITE_GOOGLE_CLIENT_ID
 ENV VITE_BACKEND_URL=${VITE_BACKEND_URL}
 RUN test -n "$VITE_BACKEND_URL" || (echo "Error: VITE_BACKEND_URL build-arg is required." && exit 1)
 
