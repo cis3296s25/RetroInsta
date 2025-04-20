@@ -1,28 +1,16 @@
-# Contents of /Users/manny/developer/RetroInsta/front-end/Dockerfile
-# (This is the *new* production Dockerfile)
-
-# ---- Build Stage ----
-FROM node:slim AS builder
+FROM node:18-alpine AS builder
 WORKDIR /app
-ENV NODE_ENV=production
+# ENV NODE_ENV=production
 
-# Copy package files and install dependencies using ci for consistency
 COPY package.json package-lock.json ./
 RUN npm ci
 
-# Copy the rest of the app's source code
 COPY . .
 
-# --- Build-time Environment Variables ---
-# Define ARGs that can be passed during the build
 ARG VITE_BACKEND_URL
 ARG VITE_GOOGLE_CLIENT_ID
-
-# Set ENV variables from ARGs so Vite build process can access them
 ENV VITE_BACKEND_URL=${VITE_BACKEND_URL}
 ENV VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID}
-
-# Verify required build args were passed
 RUN test -n "$VITE_BACKEND_URL" || (echo "Error: VITE_BACKEND_URL build-arg is required." && exit 1)
 RUN test -n "$VITE_GOOGLE_CLIENT_ID" || (echo "Error: VITE_GOOGLE_CLIENT_ID build-arg is required." && exit 1)
 
