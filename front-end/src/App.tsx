@@ -289,9 +289,6 @@ function App() {
             appUser={appUser}
             userCache={userCache}
             />
-           ) : (
-            <p>No posts available. Be the first to create one!</p>
-            )
           }
         </div>
          } />
