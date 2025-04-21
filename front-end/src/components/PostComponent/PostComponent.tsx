@@ -5,6 +5,7 @@ import { toggleFollowUser } from '../../api/users';
 import { User } from "../../models/User";
 import { toggleLikePost } from "../../api/posts";
 import CommentSection from "../CommentSection/CommentSection";
+import FollowButton from "../FollowButton/FollowButton";
 
 interface PostComponentProps {
   post: DisplayPost;
@@ -21,11 +22,6 @@ const PostComponent: React.FC<PostComponentProps> = ({ post, appUser, userCache 
   const [likes, setLikes] = useState(initialLikes);
   const [isLiked, setIsLiked] = useState(
     appUser?.likedPostIDs.includes(post._id) // initally set to whether user has liked post before
-  );
-
-  const [isFollowing, setIsFollowing] = useState(
-    // initially set to whether appUser follows author
-    appUser?.followingUserIDs.includes(author._id) || false
   );
 
   // Format the timestamp
@@ -50,17 +46,6 @@ const PostComponent: React.FC<PostComponentProps> = ({ post, appUser, userCache 
     }
   };
 
-  const handleFollowClick = async () => {
-    console.log("currentUserId:", currentUserId);
-    try {
-      await toggleFollowUser(currentUserId, author._id);
-      console.log(`Followed/unfollowed ${author._id}`);
-      setIsFollowing(!isFollowing); // toggle following
-    } catch (error) {
-      console.error("Follow action failed:", error);
-    }
-  };
-
   return (
     <div className="post">
       <div className="post-header">
@@ -70,21 +55,11 @@ const PostComponent: React.FC<PostComponentProps> = ({ post, appUser, userCache 
             <div className="avatar-placeholder">👤</div> // Placeholder if no pic
           )}
           <span className="username">{username}</span>
-            <button
-              onClick={handleFollowClick}
-              style={{
-                marginLeft: "auto",
-                backgroundColor: appUser?.followingUserIDs.includes(author._id) ? "gray" : "black",
-                color: "white",
-                border: "none",
-                padding: "0.5rem 1rem",
-                borderRadius: "4px",
-                cursor: "pointer",
-                fontSize: "1rem",
-              }}
-            >
-              {isFollowing ? "Following" : "Follow"}
-            </button>
+          
+          <FollowButton 
+            appUser={appUser}
+            targetUserID={author._id}
+          />
       </div>
 
       {imagePath ? (
