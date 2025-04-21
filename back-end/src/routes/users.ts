@@ -123,17 +123,28 @@ router.patch('/:id/follow', async (req: Request, res: Response) => {
   }
 
   try {
-    const updatedUser = await User.findByIdAndUpdate(
-      id,
-      { $addToSet: { followingUserIDs: userIdToFollow } }, // avoids duplicates
-      { new: true }
-    );
+    const user = await User.findById(id);
 
-    if (!updatedUser) {
+    if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    res.json(updatedUser);
+    if (user.followingUserIDs.includes(userIdToFollow)) {
+      user.followingUserIDs = user.followingUserIDs.filter(
+        // include every id except userIdToFollow
+        id => !id.equals(userIdToFollow) 
+      );
+    } else {
+      user.followingUserIDs.push(userIdToFollow);
+    }
+
+    await user.save();
+
+    return res.status(200).json({ 
+      message: user.followingUserIDs.includes(userIdToFollow) 
+        ? "User followed successfully" 
+        : "USer unfollowed successfully"
+    });
   } catch (error) {
     console.error("Error adding user to following list:", error);
     res.status(500).json({ error: "Internal server error" });

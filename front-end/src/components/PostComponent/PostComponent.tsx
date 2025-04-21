@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./PostComponent.css";
 import { DisplayPost, AddCommentPayload, Comment } from "../../models/Post";
-import { followUser } from '../../api/users';
+import { toggleFollowUser } from '../../api/users';
 import { User } from "../../models/User";
 import { toggleLikePost } from "../../api/posts";
 import CommentSection from "../CommentSection/CommentSection";
@@ -49,7 +49,7 @@ const PostComponent: React.FC<PostComponentProps> = ({ post, appUser, userCache 
   const handleFollowClick = async () => {
     console.log("currentUserId:", currentUserId);
     try {
-      await followUser(currentUserId, author._id);
+      await toggleFollowUser(currentUserId, author._id);
       console.log(`Followed ${author._id}`);
     } catch (error) {
       console.error("Follow action failed:", error);
