@@ -40,3 +40,15 @@
 .read-the-docs {
   color: #888;
 }
+
+.main-content {
+  margin-left: 200px;
+  padding: 20px;
+  transition: margin-left 0.5s ease;
+}
+
+@media (max-width: 900px) {
+  .main-content {
+    margin-left: 50px;
+  }
+}

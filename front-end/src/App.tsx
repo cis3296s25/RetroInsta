@@ -1,8 +1,9 @@
 import './App.css';
 import Navbar from "./components/Navbar/Navbar";
 import PostFeed from "./components/PostFeed/PostFeed";
-import CreatePostForm from "./components/CreatePostForm/CreatePostForm";
+import CreatePostPopup from "./components/CreatePostPopup/CreatePostPopup";
 import SideBar from "./components/SideBar/SideBar";
+import Profile from "./pages/Profile";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DisplayPost, BackendPost } from "./models/Post"
 import { CreatePostPayload, PostFormData } from './models/CreatePostData';
@@ -12,6 +13,7 @@ import { User } from './models/User';
 import { createPost, getAllPosts } from './api/posts';
 import { loginWithGoogleApi as loginWithGoogle } from './api/auth';
 import { getUserById, getUserById as getUserDataById } from './api/users';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 const LOCAL_STORAGE_USER_ID_KEY = 'user_id'
 
@@ -25,9 +27,14 @@ function App() {
   const [postsLoading, setPostsLoading] = useState(true);
   const [appUser, setAppUser] = useState<User | null>(null)
   const [authLoading, setAuthLoading] = useState(false)
-  const [isCreatePostFormVisible, setIsCreatePostFormVisible] = useState(false);
+  const [isCreatePostPopupOpen, setIsCreatePostPopupOpen] = useState(false);
+  const [sortedPosts, setSortedPosts] = useState<DisplayPost[]>([]);
 
   const userCache = useRef<Record<string, User>>({});
+
+  const sortPostsByLikes = useCallback((posts: DisplayPost[]) => {
+    return [...posts].sort((a, b) => b.likes - a.likes);
+  }, []);
 
   const fetchAndProcessPosts = useCallback(async () => {
     console.log("Fetching posts...");
@@ -40,6 +47,7 @@ function App() {
       if (backendPosts.length === 0) {
         console.log("No posts found.");
         setPosts([]);
+        setSortedPosts([]);
         setPostsLoading(false); // Ensure loading state is turned off
         return;
       }
@@ -55,6 +63,7 @@ function App() {
       if (uniqueAuthorIDs.length === 0) {
         console.warn("No valid author IDs found in posts.");
         setPosts([]);
+        setSortedPosts([]);
         setPostsLoading(false); // Ensure loading state is turned off
         return;
       }
@@ -116,15 +125,18 @@ function App() {
 
       console.log(`Processed ${processedPosts.length} posts to display.`);
       setPosts(processedPosts);
+      setSortedPosts(sortPostsByLikes(processedPosts));
+      
       // --- End Process Posts ---
 
     } catch (error) {
       console.error("Error fetching or processing posts:", error);
       setPosts([]); // Clear posts on error
+      setSortedPosts([]); // Clear sorted posts on error
     } finally {
       setPostsLoading(false);
     }
-  }, []); 
+  }, [sortPostsByLikes]); 
   
   // login state
   const handleLogout = useCallback(() => {
@@ -204,8 +216,8 @@ function App() {
 
   
   // create a post
-  const toggleCreatePostForm = () => {
-    setIsCreatePostFormVisible(currentVisibility => !currentVisibility);
+  const toggleCreatePostPopup = () => {
+    setIsCreatePostPopupOpen(prev => !prev);
   };
   
   const handleCreatePostSubmit = useCallback(async (formData: PostFormData) => {
@@ -231,10 +243,9 @@ function App() {
     
     try {
       const createdPost = await createPost(payload);
-      
       await fetchAndProcessPosts(); // refresh posts after creating a new one
       console.log("Post created successfully:", createdPost);
-      setIsCreatePostFormVisible(false); // Hide the form after submission
+      setIsCreatePostPopupOpen(false); // Close the popup after successful post
     } catch (error) {
       console.error("Error creating post:", error);
       alert("Failed to create post.");
@@ -248,39 +259,67 @@ function App() {
     restoreUserSession();
   }, [restoreUserSession]); // Run only when restoreUserSession identity changes
   
+
+
+
   return (
     <GoogleOAuthProvider clientId={googleClientId}>
       <div className="App">
-      <SideBar />
-        {/* Main content is wrapped in a container with left margin to avoid overlap with the fixed sidebar */}
-          <div className="main-content" style={{ marginLeft: '220px', padding: '20px' }}>
-            <Navbar 
-              user={appUser}
-              authLoading={authLoading}
-              onLoginSuccess={handleLoginSuccess}
-              onLoginError={handleLoginError}
-              onLogout={handleLogout}
-              onToggleCreatePostForm={toggleCreatePostForm}
+        <SideBar 
+          currentUser={appUser} 
+          onAddPostClick={toggleCreatePostPopup}
+          onLoginSuccess={handleLoginSuccess}
+          onLoginError={handleLoginError}
+         />
+        
+        <div className="main-content">
+        <Navbar 
+          user={appUser}
+          authLoading={authLoading}
+          onLoginSuccess={handleLoginSuccess}
+          onLoginError={handleLoginError}
+          onLogout={handleLogout}
+          />
+        <Routes>
+        <Route path="/" element={
+        <div className="Posts">
+          {postsLoading ? <p>Loading posts...</p> : 
+          posts.length > 0 ? (
+          <PostFeed 
+            posts={posts} 
+            appUser={appUser}
+            userCache={userCache}
             />
-            {isCreatePostFormVisible && (
-              <CreatePostForm onPostSubmit={handleCreatePostSubmit} />
-            )}
-          <div className="Posts">
-            {postsLoading ? (
-              <p>Loading posts...</p>
-            ) : (
-              posts.length > 0 ? (
-                <PostFeed 
-                  posts={posts} 
-                  appUser={appUser}
-                  userCache={userCache} 
-                />
-              ) : (
-                <p>No posts available. Be the first to create one!</p>
-              )
-            )}
-          </div>
+          ) : (
+            <p>No posts available. Be the first to create one!</p>
+          )
+        }
         </div>
+      } />
+        <Route path="/explore" element={
+          <div className="Posts">
+            {postsLoading ? <p>Loading posts...</p> : 
+            posts.length > 0 ? (
+            <PostFeed 
+              posts={sortedPosts} 
+              appUser={appUser}
+              userCache={userCache}
+            />
+            ) : ( 
+            <p>No posts available. Be the first to create one!</p> 
+            )
+            }
+          </div>
+        } />
+              <Route path="/profile/:userId" element={<Profile userCache={userCache || {}} />} />
+        </Routes>
+      </div>
+
+      <CreatePostPopup 
+            isOpen={isCreatePostPopupOpen}
+            onClose={toggleCreatePostPopup}
+            onPostSubmit={handleCreatePostSubmit}
+            />
       </div>
     </GoogleOAuthProvider>
   );

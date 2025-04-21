@@ -81,6 +81,29 @@ export const createPost = async (payload: CreatePostPayload): Promise<BackendPos
     }
 };
 
+
+/**
+ * Fetches posts by user ID
+ * @param userId - The ID of the user whose posts to fetch
+ * @returns A promise that resolves to an array of Post objects
+ */
+export const getPostsByUserId = async (userId: string): Promise<BackendPost[]> => {
+    const targetUrl = `${BACKEND_URL}/api/posts/user/${userId}`;
+    console.log(`[API] Fetching posts for user: ${userId}`);
+
+    try {
+        const response = await fetch(targetUrl);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch posts for user ${userId}`);
+        }
+        const data = await response.json();
+        return data as BackendPost[];
+    } catch (error) {
+        console.error(`[API] Error fetching posts for user ${userId}:`, error);
+        throw error;
+    }
+};
+
 /**
  * Adds/removed like by user from post
  * @param postID - The id of the post altered
@@ -111,3 +134,4 @@ export const toggleLikePost = async (postID: string, userID: string): Promise<vo
         console.error(`[API] Error for user ${userID} liking/unliking post ${postID}`, error);
     }
 };
+

@@ -55,6 +55,10 @@ router.post('/', upload.single("imagePath"), async (req: Request, res: Response)
   }
 });
 
+
+
+// TODO: add get, put routes for posts
+
 // PATCH /api/posts/:id/like
 router.patch('/:id/like', async (req: Request, res: Response) => {
   const { id: postID } = req.params;
@@ -101,5 +105,6 @@ router.patch('/:id/like', async (req: Request, res: Response) => {
     return res.status(500).json({ error: "Failed to add or remove like" });
   }
 });
+
 
 export default router;
