@@ -284,23 +284,30 @@ function App() {
         <Route path="/" element={
         <div className="Posts">
           {postsLoading ? <p>Loading posts...</p> : 
+          posts.length > 0 ? (
           <PostFeed 
             posts={posts} 
             appUser={appUser}
             userCache={userCache}
             />
-          }
+          ) : (
+            <p>No posts available. Be the first to create one!</p>
+          )
+        }
         </div>
-         } />
+      } />
         <Route path="/explore" element={
           <div className="Posts">
             {postsLoading ? <p>Loading posts...</p> : 
+            posts.length > 0 ? (
             <PostFeed 
               posts={sortedPosts} 
               appUser={appUser}
               userCache={userCache}
             />
-            ) : ( <p>No posts available. Be the first to create one!</p> )
+            ) : ( 
+            <p>No posts available. Be the first to create one!</p> 
+            )
             }
           </div>
         } />
