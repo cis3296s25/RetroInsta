@@ -116,32 +116,42 @@ router.put('/:id', async (req: Request, res: Response) => {
 
 router.patch('/:id/follow', async (req: Request, res: Response) => {
   const { id } = req.params;
-  const { userIdToFollow } = req.body;
+  const { targetUserID } = req.body;
 
-  if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(userIdToFollow)) {
+  if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(targetUserID)) {
     return res.status(400).json({ error: "Invalid user ID format" });
   }
 
   try {
     const user = await User.findById(id);
+    const targetUser = await User.findById(targetUserID);
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    if (user.followingUserIDs.includes(userIdToFollow)) {
+    if (!targetUser) {
+      return res.status(404).json({error: "Target user not found" });
+    }
+
+    if (user.followingUserIDs.includes(targetUserID)) {
       user.followingUserIDs = user.followingUserIDs.filter(
         // include every id except userIdToFollow
-        id => !id.equals(userIdToFollow) 
+        id => !id.equals(targetUserID) 
       );
+
+      targetUser.followers = targetUser.followers - 1;
+      // check for negative
+      if (targetUser.followers < 0) targetUser.followers = 0;
     } else {
-      user.followingUserIDs.push(userIdToFollow);
+      user.followingUserIDs.push(targetUserID);
     }
 
     await user.save();
+    await targetUser.save();
 
     return res.status(200).json({ 
-      message: user.followingUserIDs.includes(userIdToFollow) 
+      message: user.followingUserIDs.includes(targetUserID) 
         ? "User followed successfully" 
         : "USer unfollowed successfully"
     });

@@ -12,6 +12,7 @@ export interface User {
     followingUserIDs: string[],
     likedPostIDs: string[],
 
+    followers: number,
     
     // managed by mongo
     createdAt: string, // date string
