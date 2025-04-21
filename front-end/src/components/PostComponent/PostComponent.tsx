@@ -25,7 +25,7 @@ const PostComponent: React.FC<PostComponentProps> = ({ post, appUser, userCache 
   );
 
   const [isFollowing, setIsFollowing] = useState(
-    // appUser follows author initially set to whether appUser follows author
+    // initially set to whether appUser follows author
     currentUser?.followingUserIDs.includes(author._id) || false
   );
 
