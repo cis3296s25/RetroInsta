@@ -55,12 +55,10 @@ export async function storeImage(imgFile: Express.Multer.File): Promise<string> 
 
         if (IS_PRODUCTION) {
             // Production uses S3 virtual-hosted style URL
-            // STORAGE_PUBLIC_HOST = https://<bucket>.s3.<region>.amazonaws.com
             viewUrl = `${STORAGE_PUBLIC_HOST}/${objectKey}`;
             console.log(`[Upload] Production URL constructed: ${viewUrl}`);
         } else {
             // Development uses MinIO path-style URL for localhost access
-            // STORAGE_PUBLIC_HOST = http://localhost:<minio_port>
             viewUrl = `${STORAGE_PUBLIC_HOST}/${BUCKET}/${objectKey}`;
             console.log(`[Upload] Development (MinIO) URL constructed: ${viewUrl}`);
         }
