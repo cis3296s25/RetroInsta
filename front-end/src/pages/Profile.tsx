@@ -87,7 +87,7 @@ const Profile: React.FC<ProfileProps> = ({ userCache }) => {
               <span className="stat-label">Posts</span>
             </div>
             <div className="stat">
-              <span className="stat-value">{user.postIDs?.length || 0}</span>
+              <span className="stat-value">{user.followingUserIDs?.length || 0}</span>
               <span className="stat-label">Following</span>
             </div>
           </div>

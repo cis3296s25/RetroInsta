@@ -4,10 +4,8 @@
   max-width: 550px; /* Limit the width */
   margin: 2rem auto; /* Center the form horizontally, add space above/below */
   padding: 2rem; /* Add padding inside the container */
-  border: 1px solid #e0e0e0; /* Subtle border */
   border-radius: 8px; /* Rounded corners */
   background-color: #ffffff; /* White background */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); /* Subtle shadow */
 }
   
 .create-post-form-container h2 {
