@@ -37,10 +37,6 @@ GIT_HASH=$(git rev-parse --short HEAD)
 UNIQUE_TAG="${TIMESTAMP}-${GIT_HASH}"
 LATEST_TAG="latest" # Define the latest tag
 
-# 5. Navigate to Service Directory
-echo "==> Changing directory to ${SERVICE_DIR}"
-cd "${SERVICE_DIR}" || exit 1
-
 # 6. Authenticate Docker with ECR
 echo "==> Authenticating Docker with ECR in ${AWS_REGION}"
 aws ecr get-login-password --region "${AWS_REGION}" | docker login --username AWS --password-stdin "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
