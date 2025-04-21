@@ -40,11 +40,11 @@ export const getUserById = async (userId: string): Promise<User> => {
 };
 
 /**
- * Triggers follow logic from current user to another user.
- * @param currentUserId - the ID of the user who is following
- * @param userIdToFollow - the ID of the user being followed
+ * Adds/removes a user to the current user's following list.
+ * @param currentUserId - the ID of the current logged in user
+ * @param userIdToFollow - the ID of the user being followed/unfollowed
  */
- export const followUser = async (currentUserId: string, userIdToFollow: string): Promise<void> => {
+ export const toggleFollowUser = async (currentUserId: string, userIdToFollow: string): Promise<void> => {
     const targetUrl = `${BACKEND_URL}/api/users/${currentUserId}/follow`;
 
     try {
@@ -58,10 +58,10 @@ export const getUserById = async (userId: string): Promise<User> => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData?.error || 'Failed to follow user.');
+        throw new Error(errorData?.error || 'Failed to follow/unfollow user.');
       }
 
-      console.log(`[API] User ${currentUserId} followed ${userIdToFollow}`);
+      console.log(`[API] User ${currentUserId} followed/unfollowed ${userIdToFollow}`);
     } catch (err) {
       console.error('[API] Error in followUser():', err);
       throw err;
