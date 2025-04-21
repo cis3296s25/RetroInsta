@@ -73,7 +73,7 @@ const Profile: React.FC<ProfileProps> = ({ userCache }) => {
       <div className="profile-header">
         <div className="profile-picture">
           <img 
-            src={user.profilePicPath} 
+            src={user.profilePicPath ? `https://images.weserv.nl/?url=${encodeURIComponent(user.profilePicPath)}` : "https://via.placeholder.com/150"} 
             alt={`${user.username}'s profile`} 
             className="profile-avatar"
           />

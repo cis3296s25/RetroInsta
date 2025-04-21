@@ -60,7 +60,17 @@ const PostComponent: React.FC<PostComponentProps> = ({ post, appUser, userCache 
     <div className="post">
       <div className="post-header">
         {profilePicPath ? (
-            <img className="avatar" src={profilePicPath} alt={`${username}'s avatar`} />
+            <img 
+              className="avatar" 
+              src={profilePicPath.includes('googleusercontent.com') ? 
+                profilePicPath.replace('s96-c', 's150-c') : 
+                profilePicPath} 
+              alt={`${username}'s avatar`}
+              onError={(e) => {
+                console.error("Error loading profile picture:", profilePicPath);
+                e.currentTarget.src = "https://via.placeholder.com/150";
+              }}
+            />
           ) : (
             <div className="avatar-placeholder">👤</div> // Placeholder if no pic
           )}
