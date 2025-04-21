@@ -311,7 +311,7 @@ function App() {
             }
           </div>
         } />
-              <Route path="/profile/:userId" element={<Profile userCache={userCache || {}} />} />
+              <Route path="/profile/:userId" element={<Profile appUser={appUser} userCache={userCache || {}} />} />
         </Routes>
       </div>
 
