@@ -145,6 +145,7 @@ router.patch('/:id/follow', async (req: Request, res: Response) => {
       if (targetUser.followers < 0) targetUser.followers = 0;
     } else {
       user.followingUserIDs.push(targetUserID);
+      targetUser.followers = targetUser.followers + 1;
     }
 
     await user.save();
