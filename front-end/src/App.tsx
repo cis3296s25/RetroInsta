@@ -270,7 +270,7 @@ function App() {
           onAddPostClick={toggleCreatePostPopup}
           onLoginSuccess={handleLoginSuccess}
           onLoginError={handleLoginError}
-        />
+         />
         
         <div className="main-content">
         <Navbar 
@@ -288,7 +288,11 @@ function App() {
             posts={posts} 
             appUser={appUser}
             userCache={userCache}
-            />}
+            />
+           ) : (
+            <p>No posts available. Be the first to create one!</p>
+            )
+          }
         </div>
          } />
         <Route path="/explore" element={
@@ -298,12 +302,15 @@ function App() {
               posts={sortedPosts} 
               appUser={appUser}
               userCache={userCache}
-            />}
+            />
+            ) : ( <p>No posts available. Be the first to create one!</p> )
+            }
           </div>
         } />
               <Route path="/profile/:userId" element={<Profile userCache={userCache || {}} />} />
         </Routes>
       </div>
+
       <CreatePostPopup 
             isOpen={isCreatePostPopupOpen}
             onClose={toggleCreatePostPopup}

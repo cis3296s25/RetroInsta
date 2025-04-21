@@ -8,7 +8,10 @@ export interface User {
     profilePicPath: string, // path to profile photo
     bio?: string, // text that appears in bio on profile page
 
-    postIDs: string[],
+    authoredPostIDs: string[],
+    followingUserIDs: string[],
+    likedPostIDs: string[],
+
     
     // managed by mongo
     createdAt: string, // date string

@@ -1,19 +1,12 @@
-/* src/components/Feed/Feed.css (or wherever your Feed CSS is) */
-
 .feed {
   display: flex;
   flex-direction: column;
-  gap: 20px; /* <--- Restored this for spacing */
-  padding: 20px; /* <--- Restored this padding */
+  gap: 10px;
   max-width: 500px;
-  margin: auto; /* <--- Restored simple auto margin */
+  margin: auto;
   z-index: 1000;
-  /* Removed background-color, border, border-radius added in refactoring */
 }
 
-/* Keep unrelated styles ONLY if they are used by the Feed component itself */
-/* If .header and h1 are not directly rendered by Feed.tsx, you can remove them */
-/* from this file. For now, let's keep them just in case. */
 .header {
   width: 10px;
   height: 10px;
@@ -26,5 +19,6 @@ h1 {
   margin: 0;
 }
 
-/* REMOVED all .post, .post-header, .avatar, etc. styles from here */
-/* They now belong in Post.css */
+body {
+  padding-top: 60px; /* Match the height of the Navbar */
+}
