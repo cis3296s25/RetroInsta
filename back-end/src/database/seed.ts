@@ -71,16 +71,14 @@ const seedPostViaRoute = async (
     }
 };
 
-// --- Helper Function to Upload Seed Image DIRECTLY using S3 SDK ---
+// --- Helper Function to Upload Seed Image ---
 const uploadSeedImageDirectly = async (filename: string): Promise<string> => {
     const imageFilePath = path.join(SEED_IMAGES_DIR, filename);
     console.log(`[Seed Direct Upload] Processing: ${filename}`);
 
     if (!BUCKET) {
         console.error("[Seed Direct Upload] BUCKET environment variable is not set.");
-        // Return a placeholder or throw, depending on desired behavior
         return `https://via.placeholder.com/150/FF0000/FFFFFF/?text=NoBucket`;
-        // throw new Error("[Seed Direct Upload] BUCKET environment variable is not set.");
     }
 
     try {
@@ -122,8 +120,6 @@ const uploadSeedImageDirectly = async (filename: string): Promise<string> => {
         }
         // Return a placeholder on error to allow seeding to potentially continue
         return `https://via.placeholder.com/150/FF0000/FFFFFF/?text=UploadError`;
-        // Or re-throw if you want seeding to fail hard on upload errors:
-        // throw new Error(`Failed to upload seed image ${filename}: ${error.message}`);
     }
 };
 

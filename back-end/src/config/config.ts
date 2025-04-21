@@ -59,7 +59,7 @@ if (IS_PRODUCTION) {
         process.exit(1);
     } 
     
-    if (!BUCKET) { // Already checked above, but good to be explicit
+    if (!BUCKET) {
         console.error("Error: Missing required environment variable for production: BUCKET");
         process.exit(1);
     }
