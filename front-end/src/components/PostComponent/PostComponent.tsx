@@ -16,17 +16,16 @@ const PostComponent: React.FC<PostComponentProps> = ({ post, appUser, userCache 
   const { author, imagePath, description, likes: initialLikes, createdAt } = post;
   const username = author?.username || "Unknown User";
   const profilePicPath = author?.profilePicPath;
-  const currentUser = appUser;
   const currentUserId = appUser?._id || "notLoggedIn";
 
   const [likes, setLikes] = useState(initialLikes);
   const [isLiked, setIsLiked] = useState(
-    currentUser?.likedPostIDs.includes(post._id) // initally set to whether user has liked post before
+    appUser?.likedPostIDs.includes(post._id) // initally set to whether user has liked post before
   );
 
   const [isFollowing, setIsFollowing] = useState(
     // initially set to whether appUser follows author
-    currentUser?.followingUserIDs.includes(author._id) || false
+    appUser?.followingUserIDs.includes(author._id) || false
   );
 
   // Format the timestamp
@@ -35,13 +34,13 @@ const PostComponent: React.FC<PostComponentProps> = ({ post, appUser, userCache 
       : 'Timestamp unavailable';
 
   const handleLike = async () => {
-    if (!currentUser) {
+    if (!appUser) {
       alert("You must be logged in to like a post, stupid.");
       return;
     }
 
     try {
-      await toggleLikePost(post._id, currentUser._id);
+      await toggleLikePost(post._id, appUser._id);
       setLikes((prevLikes) => (isLiked ? prevLikes - 1 : prevLikes + 1));
       setIsLiked(!isLiked);
       console.log("User liked/unliked post.");
@@ -75,7 +74,7 @@ const PostComponent: React.FC<PostComponentProps> = ({ post, appUser, userCache 
               onClick={handleFollowClick}
               style={{
                 marginLeft: "auto",
-                backgroundColor: currentUser?.followingUserIDs.includes(author._id) ? "gray" : "black",
+                backgroundColor: appUser?.followingUserIDs.includes(author._id) ? "gray" : "black",
                 color: "white",
                 border: "none",
                 padding: "0.5rem 1rem",
@@ -111,10 +110,10 @@ const PostComponent: React.FC<PostComponentProps> = ({ post, appUser, userCache 
           </div>
 
           {/* Comment section */}
-          {currentUser && (
+          {appUser && (
             <CommentSection
               postID={post._id}
-              currentUser={currentUser}
+              currentUser={appUser}
               userCache={userCache || { current: {} }} // Provide a default empty cache
               imagePath={imagePath}
             />
