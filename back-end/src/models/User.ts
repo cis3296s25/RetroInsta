@@ -13,6 +13,8 @@ export interface IUser extends Document {
   likedPostIDs: Types.ObjectId[];
   followingUserIDs: Types.ObjectId[];
 
+  followers: number;
+
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -60,6 +62,11 @@ const userSchema: Schema<IUser> = new Schema({
     ref: 'User', 
     default: [] 
   }],
+
+  followers: {
+    type: Number,
+    default: 0
+  }
 }, {
   timestamps: true, // creates createdAt and updatedAt fields
   collection: USERS_COLLECTION

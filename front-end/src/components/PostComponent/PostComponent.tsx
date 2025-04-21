@@ -1,10 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./PostComponent.css";
-import { DisplayPost, AddCommentPayload, Comment } from "../../models/Post";
-import { followUser } from '../../api/users';
+import { DisplayPost } from "../../models/Post";
+import { toggleFollowUser } from '../../api/users';
 import { User } from "../../models/User";
 import { toggleLikePost } from "../../api/posts";
 import CommentSection from "../CommentSection/CommentSection";
+import FollowButton from "../FollowButton/FollowButton";
 
 interface PostComponentProps {
   post: DisplayPost;
@@ -16,12 +17,11 @@ const PostComponent: React.FC<PostComponentProps> = ({ post, appUser, userCache 
   const { author, imagePath, description, likes: initialLikes, createdAt } = post;
   const username = author?.username || "Unknown User";
   const profilePicPath = author?.profilePicPath;
-  const currentUser = appUser;
   const currentUserId = appUser?._id || "notLoggedIn";
 
   const [likes, setLikes] = useState(initialLikes);
   const [isLiked, setIsLiked] = useState(
-    currentUser?.likedPostIDs.includes(post._id) // initally set to whether user has liked post before
+    appUser?.likedPostIDs.includes(post._id) // initally set to whether user has liked post before
   );
 
   // Format the timestamp
@@ -30,29 +30,19 @@ const PostComponent: React.FC<PostComponentProps> = ({ post, appUser, userCache 
       : 'Timestamp unavailable';
 
   const handleLike = async () => {
-    if (!currentUser) {
+    if (!appUser) {
       alert("You must be logged in to like a post, stupid.");
       return;
     }
 
     try {
-      await toggleLikePost(post._id, currentUser._id);
+      await toggleLikePost(post._id, appUser._id);
       setLikes((prevLikes) => (isLiked ? prevLikes - 1 : prevLikes + 1));
       setIsLiked(!isLiked);
       console.log("User liked/unliked post.");
     } catch (error) {
       console.error("Error toggling like:", error);
       alert("Failed to like/unlike post");
-    }
-  };
-
-  const handleFollowClick = async () => {
-    console.log("currentUserId:", currentUserId);
-    try {
-      await followUser(currentUserId, author._id);
-      console.log(`Followed ${author._id}`);
-    } catch (error) {
-      console.error("Follow action failed:", error);
     }
   };
 
@@ -65,21 +55,11 @@ const PostComponent: React.FC<PostComponentProps> = ({ post, appUser, userCache 
             <div className="avatar-placeholder">👤</div> // Placeholder if no pic
           )}
           <span className="username">{username}</span>
-          <button
-            onClick={handleFollowClick}
-            style={{
-              marginLeft: "auto",
-              backgroundColor: "black",
-              color: "white",
-              border: "none",
-              padding: "0.5rem 1rem",
-              borderRadius: "4px",
-              cursor: "pointer",
-              fontSize: "1rem",
-            }}
-          >
-            Follow
-          </button>
+          
+          <FollowButton 
+            appUser={appUser}
+            targetUserID={author._id}
+          />
       </div>
 
       {imagePath ? (
@@ -105,10 +85,10 @@ const PostComponent: React.FC<PostComponentProps> = ({ post, appUser, userCache 
           </div>
 
           {/* Comment section */}
-          {currentUser && (
+          {appUser && (
             <CommentSection
               postID={post._id}
-              currentUser={currentUser}
+              currentUser={appUser}
               userCache={userCache || { current: {} }} // Provide a default empty cache
               imagePath={imagePath}
             />

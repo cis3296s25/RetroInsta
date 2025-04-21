@@ -6,12 +6,14 @@ import { getUserById } from '../api/users';
 import { getAllPosts } from '../api/posts';
 import PostFeed from '../components/PostFeed/PostFeed';
 import './Profile.css';
+import FollowButton from '../components/FollowButton/FollowButton';
 
 interface ProfileProps {
+  appUser: User | null
   userCache: Record<string, User>;
 }
 
-const Profile: React.FC<ProfileProps> = ({ userCache }) => {
+const Profile: React.FC<ProfileProps> = ({ appUser, userCache }) => {
   const { userId } = useParams<{ userId: string }>();
   const [user, setUser] = useState<User | null>(null);
   const [posts, setPosts] = useState<DisplayPost[]>([]);
@@ -80,11 +82,19 @@ const Profile: React.FC<ProfileProps> = ({ userCache }) => {
         </div>
         <div className="profile-info">
           <h1 className="profile-username">{user.username}</h1>
+          <FollowButton
+            appUser={appUser}
+            targetUserID={userId}
+          />
           {user.bio && <p className="profile-bio">{user.bio}</p>}
           <div className="profile-stats">
             <div className="stat">
               <span className="stat-value">{posts.length}</span>
               <span className="stat-label">Posts</span>
+            </div>
+            <div className="stat">
+              <span className="stat-value">{user.followers || 0}</span>
+              <span className="stat-label">Followers</span>
             </div>
             <div className="stat">
               <span className="stat-value">{user.followingUserIDs?.length || 0}</span>

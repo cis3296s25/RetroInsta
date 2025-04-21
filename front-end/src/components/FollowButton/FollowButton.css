@@ -1,0 +1,30 @@
+.follow-button {
+    /* Base styles */
+    background-color: black; /* Default state: Follow */
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s ease, opacity 0.2s ease; /* Add transitions */
+    /* Remove margin-left if handled by parent layout */
+    /* margin-left: auto; */
+  }
+  
+  .follow-button.following {
+    /* Styles when following */
+    background-color: gray; /* Following state */
+  }
+  
+  .follow-button:hover:not(:disabled) {
+     /* Optional: Add subtle hover effect */
+    opacity: 0.85;
+  }
+  
+  .follow-button:disabled,
+  .follow-button.loading {
+    /* Styles when loading/disabled */
+    cursor: default;
+    opacity: 0.7;
+  }
