@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./PostComponent.css";
-import { DisplayPost, AddCommentPayload, Comment } from "../../models/Post";
+import { DisplayPost } from "../../models/Post";
 import { toggleFollowUser } from '../../api/users';
 import { User } from "../../models/User";
 import { toggleLikePost } from "../../api/posts";
@@ -22,6 +22,11 @@ const PostComponent: React.FC<PostComponentProps> = ({ post, appUser, userCache 
   const [likes, setLikes] = useState(initialLikes);
   const [isLiked, setIsLiked] = useState(
     currentUser?.likedPostIDs.includes(post._id) // initally set to whether user has liked post before
+  );
+
+  const [isFollowing, setIsFollowing] = useState(
+    // appUser follows author initially set to whether appUser follows author
+    currentUser?.followingUserIDs.includes(author._id) || false
   );
 
   // Format the timestamp
@@ -50,7 +55,8 @@ const PostComponent: React.FC<PostComponentProps> = ({ post, appUser, userCache 
     console.log("currentUserId:", currentUserId);
     try {
       await toggleFollowUser(currentUserId, author._id);
-      console.log(`Followed ${author._id}`);
+      console.log(`Followed/unfollowed ${author._id}`);
+      setIsFollowing(!isFollowing); // toggle following
     } catch (error) {
       console.error("Follow action failed:", error);
     }
@@ -65,21 +71,21 @@ const PostComponent: React.FC<PostComponentProps> = ({ post, appUser, userCache 
             <div className="avatar-placeholder">👤</div> // Placeholder if no pic
           )}
           <span className="username">{username}</span>
-          <button
-            onClick={handleFollowClick}
-            style={{
-              marginLeft: "auto",
-              backgroundColor: "black",
-              color: "white",
-              border: "none",
-              padding: "0.5rem 1rem",
-              borderRadius: "4px",
-              cursor: "pointer",
-              fontSize: "1rem",
-            }}
-          >
-            Follow
-          </button>
+            <button
+              onClick={handleFollowClick}
+              style={{
+                marginLeft: "auto",
+                backgroundColor: currentUser?.followingUserIDs.includes(author._id) ? "gray" : "black",
+                color: "white",
+                border: "none",
+                padding: "0.5rem 1rem",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontSize: "1rem",
+              }}
+            >
+              {isFollowing ? "Following" : "Follow"}
+            </button>
       </div>
 
       {imagePath ? (
