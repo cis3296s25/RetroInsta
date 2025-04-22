@@ -81,7 +81,6 @@ export const createPost = async (payload: CreatePostPayload): Promise<BackendPos
     }
 };
 
-
 /**
  * Fetches posts by user ID
  * @param userId - The ID of the user whose posts to fetch
@@ -103,6 +102,23 @@ export const getPostsByUserId = async (userId: string): Promise<BackendPost[]> =
         throw error;
     }
 };
+
+export const getFollowingFeedPosts = async (userId: string): Promise<BackendPost[]> => {
+    const targetUrl = `${BACKEND_URL}/api/posts/user/${userId}/following`;
+    console.log(`[API] Fetching following feed posts for user: ${userId}`);
+
+    try {
+        const response = await fetch(targetUrl);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch posts for user ${userId}`);
+        }
+        const data = await response.json();
+        return data as BackendPost[];
+    } catch (error) {
+        console.error(`[API] Error fetching following feed posts for user ${userId}:`, error);
+        throw error;
+    }
+}
 
 /**
  * Adds/removed like by user from post
