@@ -9,9 +9,7 @@ COPY . .
 ARG VITE_BACKEND_URL
 ARG VITE_GOOGLE_CLIENT_ID
 ENV VITE_BACKEND_URL=${VITE_BACKEND_URL}
-ENV VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID}
 RUN test -n "$VITE_BACKEND_URL" || (echo "Error: VITE_BACKEND_URL build-arg is required." && exit 1)
-RUN test -n "$VITE_GOOGLE_CLIENT_ID" || (echo "Error: VITE_GOOGLE_CLIENT_ID build-arg is required." && exit 1)
 
 # Build the React app for production
 RUN npm run build
