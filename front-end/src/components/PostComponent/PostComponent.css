@@ -1,38 +1,31 @@
-/* === Paste this into your PostComponent.css or related CSS file === */
+/* Merged PostComponent.css */
 
+/* --- Styles primarily from File 1 (General Structure & Header) --- */
 .post {
   border: 1px solid #ddd;
   border-radius: 8px;
-  padding: 10px; /* This provides overall padding around the header */
+  padding: 10px;
   margin-bottom: 20px;
   background-color: #fff;
-  position: relative; /* For timestamp positioning */
+  position: relative; /* Keep relative positioning for timestamp */
 }
 
 .post-header {
   display: flex;
-  align-items: center; /* Vertically aligns the author-link block */
-  /* Removed gap here as author-link handles internal gap */
-  margin-bottom: 10px; /* Space below the header */
-}
-
-/* This is the link containing the avatar and username */
-.author-link {
-  display: flex; /* Make avatar and username flex items */
-  align-items: center; /* Vertically center avatar and username */
-  gap: 12px; /* << INCREASED gap for a bit more space ('padding') between avatar and username */
-  text-decoration: none;
-  color: inherit;
+  align-items: center;
+  gap: 10px; /* Keep the 10px gap from File 1 */
+  margin-bottom: 10px;
 }
 
 .avatar {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  flex-shrink: 0; /* Prevent avatar from shrinking */
+  object-fit: cover; /* Good practice */
+  flex-shrink: 0; /* Prevent shrinking */
 }
 
-.avatar-placeholder {
+.avatar-placeholder { /* Added from File 2 for consistency */
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -47,22 +40,22 @@
 
 .username {
   font-weight: bold;
-  /* No specific centering needed here, align-items on parent handles it */
+  color: black; /* Ensure text color */
 }
 
 .post-image {
   width: 100%;
   display: block; /* Prevents potential extra space below */
-  /* max-height: 400px; */ /* Consider removing or adjusting max-height for aspect ratio */
+  /* max-height: 400px; */ /* Using File 2's approach (no max-height by default) */
   object-fit: cover;
   border-radius: 8px;
   margin-bottom: 10px;
-  background-color: #f0f0f0; /* Added background for loading/placeholder */
+  background-color: #f0f0f0; /* Background for loading/placeholder */
 }
 
-.image-placeholder {
+.image-placeholder { /* Using File 2's placeholder style */
   width: 100%;
-  height: 200px; /* Give placeholder a defined height */
+  height: 200px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -74,19 +67,20 @@
 }
 
 .post-content {
-  padding: 5px 5px 10px 5px; /* Adjusted padding */
+   padding: 5px 5px 10px 5px; /* Using File 2's padding */
 }
 
-.post-description {
+.post-description { /* Using File 2's description style */
   margin-bottom: 10px;
-  white-space: pre-wrap; /* Allows line breaks in description */
+  white-space: pre-wrap;
   word-wrap: break-word;
 }
 
+/* --- Styles replaced by File 2 (Actions, Like, Comment, Modal) --- */
 .post-actions {
   display: flex;
   align-items: center;
-  gap: 15px; /* Slightly increased gap */
+  gap: 15px; /* Increased gap */
   padding: 8px 0;
   border-top: 1px solid #eee; /* Add separator line */
   margin-top: 10px; /* Add space above actions */
@@ -118,7 +112,6 @@
   color: #333;
 }
 
-/* Adjusted like button hover/active/liked states */
 .like-button:active {
   transform: scale(0.9);
 }
@@ -133,9 +126,7 @@
   color: #000; /* Black hover for non-liked */
 }
 
-
-/* Comment Section Trigger (Assuming CommentSection component renders this structure) */
-/* Adjust .comment-section selector if your component renders differently */
+/* Comment Section Trigger */
 .comment-section {
   display: flex;
   align-items: center;
@@ -157,26 +148,29 @@
   color: #000; /* Darker hover */
 }
 
-/* Timestamp */
+/* Timestamp - Using File 1's absolute positioning */
 .timestamp {
   position: absolute;
-  bottom: 10px; /* Position relative to .post padding */
-  right: 10px;  /* Position relative to .post padding */
-  font-size: 11px; /* Smaller */
-  color: #aaa; /* Lighter gray */
-  text-transform: uppercase; /* Optional styling */
+  /* bottom: 10px; */ /* Adjusted based on File 1 */
+  /* Adjust vertical position if needed relative to post-content */
+  top: 15px; /* Example: Near top-right */
+  right: 10px;
+  font-size: 12px;
+  color: #888;
+  /* text-transform: uppercase; */ /* Removed uppercase from File 2 */
 }
 
-/* --- Styles for Comments List (within modal or dropdown) --- */
+
+/* --- Styles for Comments List (within modal or dropdown) from File 2 --- */
 .comments-list {
   display: flex;
   flex-direction: column;
   gap: 10px;
   text-align: left;
-  padding: 5px 0; /* Add some padding */
+  padding: 5px 0;
 }
 
-.comment { /* Style for each comment item */
+.comment {
   font-size: 14px;
   line-height: 1.4;
 }
@@ -186,18 +180,18 @@
   margin-right: 5px;
 }
 
-/* --- Styles for Comment Input Fields --- */
+/* --- Styles for Comment Input Fields from File 2 --- */
 .comment-input {
   flex-grow: 1;
-  padding: 8px 12px; /* Comfortable padding */
-  border: 1px solid #dbdbdb; /* Lighter border */
-  border-radius: 18px; /* More rounded */
+  padding: 8px 12px;
+  border: 1px solid #dbdbdb;
+  border-radius: 18px;
   font-size: 14px;
   outline: none;
-  background-color: #fafafa; /* Very light background */
+  background-color: #fafafa;
 }
 .comment-input:focus {
-  border-color: #a8a8a8; /* Darken border on focus */
+  border-color: #a8a8a8;
   background-color: #fff;
 }
 
@@ -211,11 +205,11 @@
   transition: background-color 0.2s ease;
   background-color: #0095f6; /* Instagram-like blue */
   color: white;
-  flex-shrink: 0; /* Prevent shrinking */
+  flex-shrink: 0;
 }
 
 .comment-submit:hover:not(:disabled) {
-  background-color: #0077cc; /* Darker blue */
+  background-color: #0077cc;
 }
 .comment-submit:disabled {
   opacity: 0.5;
@@ -225,7 +219,7 @@
   transform: scale(0.98);
 }
 
-/* --- Modal Styles (Keep as is or adjust as needed) --- */
+/* --- Modal Styles from File 2 --- */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -242,25 +236,23 @@
 .modal-box {
   position: relative;
   width: 90%;
-  max-width: 600px; /* Max width for image modal */
-  max-height: 90vh; /* Max height */
+  max-width: 600px;
+  max-height: 90vh;
   overflow: hidden;
   border-radius: 12px;
-  background-color: #fff; /* Background for the modal box */
-  display: flex; /* Use flex for layout */
-  flex-direction: column; /* Stack image and comments */
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
 }
 
 .modal-full-image {
   width: 100%;
-  /* Let image take available space, respecting aspect ratio */
-  max-height: 70vh; /* Limit image height within modal */
-  object-fit: contain; /* Show whole image */
-  background-color: #fff; /* Background for image area */
+  max-height: 70vh;
+  object-fit: contain;
+  background-color: #fff;
   display: block;
-  flex-shrink: 0; /* Don't shrink image area */
+  flex-shrink: 0;
 }
-
 
 .modal-comments-overlay {
   width: 100%;
@@ -270,13 +262,13 @@
   border-top: 1px solid #ddd;
   display: flex;
   flex-direction: column;
-  flex-grow: 1; /* Allow comments section to fill remaining space */
-  min-height: 100px; /* Minimum height for comment section */
-  max-height: 30vh; /* Prevent comment section getting too tall */
+  flex-grow: 1;
+  min-height: 100px;
+  max-height: 30vh;
 }
 
 .modal-comments-scroll {
-  flex-grow: 1; /* Scroll area takes available space */
+  flex-grow: 1;
   overflow-y: auto;
   margin-bottom: 10px;
 }
@@ -284,8 +276,8 @@
 .modal-comment-input-row {
   display: flex;
   gap: 8px;
-  align-items: center; /* Align input and button */
-  flex-shrink: 0; /* Prevent input row shrinking */
+  align-items: center;
+  flex-shrink: 0;
 }
 
 .close-button {
@@ -303,7 +295,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10; /* Ensure it's above content */
+  z-index: 10;
   line-height: 1;
 }
 .close-button:hover {
