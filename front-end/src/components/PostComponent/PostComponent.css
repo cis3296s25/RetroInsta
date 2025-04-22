@@ -67,7 +67,7 @@
 }
 
 .post-content {
-   padding: 5px 5px 10px 5px; /* Using File 2's padding */
+  padding: 5px 5px 10px 5px; /* Using File 2's padding */
 }
 
 .post-description { /* Using File 2's description style */
@@ -150,14 +150,11 @@
 
 /* Timestamp - Using File 1's absolute positioning */
 .timestamp {
-  position: absolute;
-  /* bottom: 10px; */ /* Adjusted based on File 1 */
-  /* Adjust vertical position if needed relative to post-content */
-  top: 15px; /* Example: Near top-right */
-  right: 10px;
   font-size: 12px;
   color: #888;
-  /* text-transform: uppercase; */ /* Removed uppercase from File 2 */
+  margin-left: auto;
+  padding-left: 10px;
+  white-space: nowrap;
 }
 
 
