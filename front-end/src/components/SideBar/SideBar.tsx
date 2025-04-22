@@ -11,7 +11,7 @@ import GoogleLoginButton from '../GoogleLoginButton/GoogleLoginButton';
 interface SideBarProps {
   currentUser?: User | null;
   onAddPostClick: () => void;
-  onLoginSuccess: (decodedToken: any, credentialResponse: any) => void;
+  onLoginSuccess: (idToken: string) => void;
   onLoginError: () => void;
 }
 
@@ -32,6 +32,11 @@ const SideBar: React.FC<SideBarProps> = ({
 
   const handleCloseLoginPopup = () => {
     setShowLoginPopup(false);
+  };
+
+  const handleGoogleButtonSuccess = (idToken: string) => {
+    onLoginSuccess(idToken);
+    handleCloseLoginPopup();
   };
 
   return (
@@ -93,10 +98,7 @@ const SideBar: React.FC<SideBarProps> = ({
             <h3>Please Login</h3>
             <p>You need to be logged in to access this feature.</p>
             <GoogleLoginButton
-              onLoginSuccess={(decodedToken, credentialResponse) => {
-                onLoginSuccess(decodedToken, credentialResponse);
-                handleCloseLoginPopup();
-              }}
+              onLoginSuccess={handleGoogleButtonSuccess}
               onLoginError={onLoginError}
             />
           </div>

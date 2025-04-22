@@ -7,7 +7,7 @@ import { User } from '../../models/User';
 interface NavbarProps {
   user: User | null;
   authLoading: boolean;
-  onLoginSuccess: (decodedToken: GoogleIdTokenPayload, credentialResponse: CredentialResponse) => void;
+  onLoginSuccess: (idToken: string) => void;
   onLoginError: () => void;
   onLogout: () => void;
 }
