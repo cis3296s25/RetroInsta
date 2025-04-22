@@ -1,0 +1,12 @@
+.comment {
+  text-align: left; /* Ensures text is left-aligned */
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.comment-author {
+  font-weight: bold;
+  color: black; /* Ensure text color */
+} 
