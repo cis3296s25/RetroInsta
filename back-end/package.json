@@ -19,6 +19,7 @@
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "form-data": "^4.0.2",
+    "google-auth-library": "^9.15.1",
     "minio": "^8.0.5",
     "mongoose": "^8.13.2",
     "multer": "^1.4.5-lts.2",

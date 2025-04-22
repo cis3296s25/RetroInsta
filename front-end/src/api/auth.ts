@@ -1,10 +1,32 @@
 import { User } from '../models/User';
 import { BACKEND_URL } from './config';
 
+export const fetchGoogleClientId = async (): Promise<string> => {
+    const targetUrl = `${BACKEND_URL}/api/auth/google/config`;
+    
+    console.log(`[API] Fetching Google Client ID`);
+    try {
+        const response = await fetch(targetUrl);
+        
+        if (!response.ok) {
+            throw new Error(`Failed to fetch Google Client ID: Status ${response.status}`);
+        }
+        
+        const data = await response.json()
+        if (!data.clientId) {
+            throw new Error("Client ID not found in response from back end.");
+        }
+        
+        console.log("[API] Google Client ID fetched successfully.");
+        return data.clientId;
+    } catch (error) {
+        console.error("[API] Error fetching Google Client ID:", error);
+        throw error;
+    }
+};
+
 interface GoogleLoginPayload {
-    googleId: string;
-    email: string;
-    profilePicPath?: string;
+    idToken: string
 }
 
 /**
@@ -13,18 +35,16 @@ interface GoogleLoginPayload {
  * @returns A promise that resolves to the User object from the backend.
  */
 export const loginWithGoogleApi = async (payload: GoogleLoginPayload): Promise<User> => {
-    if (!payload.googleId || !payload.email) throw new Error("Missing googleId or email in login payload.");
+    if (!payload.idToken) throw new Error("Missing idToken on login payload");
 
     const targetUrl = `${BACKEND_URL}/api/auth/google/login`;
-    console.log(`[API] Attempting Google login POST to: ${targetUrl}`);
-
+    console.log(`[API] Attempting Google login POST (with ID token) to: ${targetUrl}`);
     try {
         const response = await fetch(targetUrl, {
             method: "POST",
             headers: { "Content-Type": "application/json", "Accept": "application/json" },
             body: JSON.stringify(payload),
         });
-        console.log(`[API] Google login response status: ${response.status}`);
 
         const responseData = await response.json();
 
@@ -35,8 +55,7 @@ export const loginWithGoogleApi = async (payload: GoogleLoginPayload): Promise<U
         }
 
         console.log("[API] Google login successful, user data received:", responseData);
-        return responseData as User; // Assume response matches User structure
-
+        return responseData as User;
     } catch (error) {
         console.error(`[API] Network or parsing error during Google login:`, error);
         if (error instanceof Error) throw error;

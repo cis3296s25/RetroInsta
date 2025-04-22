@@ -12,7 +12,6 @@ services:
       - /app/node_modules  # Avoids overwriting node_modules inside the container
     environment:
       - CHOKIDAR_USEPOLLING=true  # Ensures file change detection works in Docker
-      - VITE_GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
     depends_on:
       - back-end
     

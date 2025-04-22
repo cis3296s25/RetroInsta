@@ -15,7 +15,7 @@
 }
 
 .profile-picture {
-  margin-right: 10px;
+  margin-right: 10px; /* Consider increasing this slightly (e.g., 30px) */
 }
 
 .profile-avatar {
@@ -31,29 +31,39 @@
   flex: 1;
 }
 
+/* Wrapper for username and follow button */
+.profile-name-follow {
+  display: flex;        
+  align-items: center; /* Vertical centering */
+  gap: 15px;           
+  margin-bottom: 15px;  /* Space below this row */
+}
+
 .profile-username {
   font-size: 25px;
   font-weight: 600;
-  margin: 0 0 10px 0;
   color: #262626;
+  margin: 0;           /* Remove margin from h1 */
 }
+
+/* FollowButton component would go here in the flex row */
 
 .profile-bio {
   font-size: 16px;
   color: #262626;
-  margin: 0 0 20px 0;
+  margin: 0 0 20px 0; /* Keep margin below bio */
   line-height: 1.5;
 }
 
 .profile-stats {
   display: flex;
-  gap: 20px;
+  gap: 30px; /* Increased gap for stats */
 }
 
 .stat {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: center; /* Center text within stat block */
 }
 
 .stat-value {

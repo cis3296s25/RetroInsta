@@ -1,13 +1,11 @@
 import './Navbar.css';
 import GoogleLoginButton from '../GoogleLoginButton/GoogleLoginButton'; // Adjust path
-import { CredentialResponse } from '@react-oauth/google';
-import { GoogleIdTokenPayload } from '../../models/GoogleIdTokenPayload';
 import { User } from '../../models/User';
 
 interface NavbarProps {
   user: User | null;
   authLoading: boolean;
-  onLoginSuccess: (decodedToken: GoogleIdTokenPayload, credentialResponse: CredentialResponse) => void;
+  onLoginSuccess: (idToken: string) => void;
   onLoginError: () => void;
   onLogout: () => void;
 }

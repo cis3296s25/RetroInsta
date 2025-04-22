@@ -12,10 +12,8 @@ set -e # Exit immediately if a command exits with a non-zero status.
 # 1. Get Required Build Arguments (Prompt user or use defaults)
 #    You MUST provide these values for the build to work correctly.
 read -p "Enter VITE_BACKEND_URL (App Runner backend URL): " VITE_BACKEND_URL
-read -p "Enter VITE_GOOGLE_CLIENT_ID (Your Google Client ID): " VITE_GOOGLE_CLIENT_ID
-
-if [[ -z "${VITE_BACKEND_URL}" || -z "${VITE_GOOGLE_CLIENT_ID}" ]]; then
-  echo "ERROR: VITE_BACKEND_URL and VITE_GOOGLE_CLIENT_ID build arguments are required." >&2
+if [[ -z "${VITE_BACKEND_URL}" ]]; then
+  echo "ERROR: VITE_BACKEND_URL build argument is required." >&2
   exit 1
 fi
 
@@ -45,7 +43,6 @@ aws ecr get-login-password --region "${AWS_REGION}" | docker login --username AW
 #    Using regular 'docker build' for now as BuildKit had issues. Use 'docker buildx build --push' if that proved more reliable for you.
 echo "==> Building frontend image using Dockerfile: ${DOCKERFILE_NAME}"
 echo "    VITE_BACKEND_URL=${VITE_BACKEND_URL}"
-echo "    VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID}"
 
 # Consider adding DOCKER_BUILDKIT=0 if builds failed without it previously
 # export DOCKER_BUILDKIT=0
@@ -53,7 +50,6 @@ docker build \
   -f "${DOCKERFILE_NAME}" \
   --platform linux/amd64 \
   --build-arg VITE_BACKEND_URL="${VITE_BACKEND_URL}" \
-  --build-arg VITE_GOOGLE_CLIENT_ID="${VITE_GOOGLE_CLIENT_ID}" \
   -t "${ECR_URI}:${UNIQUE_TAG}" \
   -t "${ECR_URI}:${LATEST_TAG}" \
   . # Build context is current directory (SERVICE_DIR)

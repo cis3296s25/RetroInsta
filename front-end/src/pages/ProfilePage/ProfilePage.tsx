@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { User } from '../models/User';
-import { BackendPost, DisplayPost } from '../models/Post';
-import { getUserById } from '../api/users';
-import { getAllPosts } from '../api/posts';
-import PostFeed from '../components/PostFeed/PostFeed';
-import './Profile.css';
-import FollowButton from '../components/FollowButton/FollowButton';
+import { User } from '../../models/User';
+import { BackendPost, DisplayPost } from '../../models/Post';
+import { getUserById } from '../../api/users';
+import { getAllPosts, getPostsByUserId } from '../../api/posts';
+import PostFeed from '../../components/PostFeed/PostFeed';
+import './ProfilePage.css';
+import FollowButton from '../../components/FollowButton/FollowButton';
+import { convertBackendPostToDisplayPost } from '../../utils/postUtils';
 
 interface ProfileProps {
   appUser: User | null
   userCache: Record<string, User>;
 }
 
-const Profile: React.FC<ProfileProps> = ({ appUser, userCache }) => {
+const ProfilePage: React.FC<ProfileProps> = ({ appUser, userCache }) => {
   const { userId } = useParams<{ userId: string }>();
   const [user, setUser] = useState<User | null>(null);
   const [posts, setPosts] = useState<DisplayPost[]>([]);
@@ -28,23 +29,16 @@ const Profile: React.FC<ProfileProps> = ({ appUser, userCache }) => {
           return;
         }
 
-        const [userData, allPosts] = await Promise.all([
+        const [userData, userBackendPosts] = await Promise.all([
           getUserById(userId),
-          getAllPosts()
+          getPostsByUserId(userId) 
         ]);
 
         setUser(userData);
         
-        // Convert BackendPost to DisplayPost
-        const userPosts: DisplayPost[] = allPosts
-          .filter(post => post.authorID === userId)
-          .map(post => {
-            const { authorID, ...rest } = post;
-            return {
-              ...rest,
-              author: userData
-            };
-          });
+        const userPosts: DisplayPost[] = userBackendPosts
+            .map(backendPost => convertBackendPostToDisplayPost(backendPost, userData))
+            .filter((post): post is DisplayPost => post !== null); // Filter out nulls if conversion failed
         
         setPosts(userPosts);
       } catch (err) {
@@ -81,11 +75,13 @@ const Profile: React.FC<ProfileProps> = ({ appUser, userCache }) => {
           />
         </div>
         <div className="profile-info">
-          <h1 className="profile-username">{user.username}</h1>
-          <FollowButton
-            appUser={appUser}
-            targetUserID={userId}
-          />
+          <div className='profile-name-follow'>
+            <h1 className="profile-username">{user.username}</h1>
+            <FollowButton
+              appUser={appUser}
+              targetUserID={userId}
+            />
+          </div>
           {user.bio && <p className="profile-bio">{user.bio}</p>}
           <div className="profile-stats">
             <div className="stat">
@@ -116,4 +112,4 @@ const Profile: React.FC<ProfileProps> = ({ appUser, userCache }) => {
   );
 };
 
-export default Profile;
+export default ProfilePage;

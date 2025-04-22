@@ -3,24 +3,19 @@ import Navbar from "./components/Navbar/Navbar";
 import PostFeed from "./components/PostFeed/PostFeed";
 import CreatePostPopup from "./components/CreatePostPopup/CreatePostPopup";
 import SideBar from "./components/SideBar/SideBar";
-import Profile from "./pages/Profile";
+import ProfilePage from "./pages/ProfilePage/ProfilePage";
+import ExplorePage from "./pages/ExplorePage";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DisplayPost, BackendPost } from "./models/Post"
 import { CreatePostPayload, PostFormData } from './models/CreatePostData';
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import { GoogleIdTokenPayload } from './models/GoogleIdTokenPayload';
 import { User } from './models/User';
 import { createPost, getAllPosts } from './api/posts';
-import { loginWithGoogleApi as loginWithGoogle } from './api/auth';
+import { fetchGoogleClientId, loginWithGoogleApi as loginWithGoogle } from './api/auth';
 import { getUserById, getUserById as getUserDataById } from './api/users';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 
 const LOCAL_STORAGE_USER_ID_KEY = 'user_id'
-
-const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
-if (!googleClientId) {
-  console.error("Error. VITE_GOOGLE_CLIENT_ID env variable not set.")
-}
 
 function App() {
   const [posts, setPosts] = useState<DisplayPost[]>([]);
@@ -29,6 +24,27 @@ function App() {
   const [authLoading, setAuthLoading] = useState(false)
   const [isCreatePostPopupOpen, setIsCreatePostPopupOpen] = useState(false);
   const [sortedPosts, setSortedPosts] = useState<DisplayPost[]>([]);
+
+  // for Google Client ID
+  const [googleClientId, setGoogleClientId] = useState<string | null>(null);
+  const [clientIdLoading, setClientIdLoading] = useState(true);
+  const [clientIdError, setClientIdError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadClientID = async () => {
+      setClientIdLoading(true);
+      setClientIdError(null);
+      try {
+        setGoogleClientId(await fetchGoogleClientId());
+      } catch (error) {
+        console.error("Failed to load Google Client ID:", error);
+        setClientIdError("Could not initialize Google Login. Please try reloading the page.")
+      } finally {
+        setClientIdLoading(false);
+      }
+    };
+    loadClientID()
+  }, []);
 
   const userCache = useRef<Record<string, User>>({});
 
@@ -137,6 +153,11 @@ function App() {
       setPostsLoading(false);
     }
   }, [sortPostsByLikes]); 
+
+  useEffect(() => {
+    console.log("App Mounted: Triggering initial post fetch.");
+    fetchAndProcessPosts();
+  }, [fetchAndProcessPosts]);
   
   // login state
   const handleLogout = useCallback(() => {
@@ -152,29 +173,16 @@ function App() {
     setPosts([]);
   }, []);
   
-  const handleLoginSuccess = useCallback(async (decodedToken: GoogleIdTokenPayload) => {
+  const handleLoginSuccess = useCallback(async (idToken: string) => {
     console.log("Attempting Google login...");
     setAuthLoading(true);
-    const googleId = decodedToken.sub;
-    const email = decodedToken.email;
-    const profilePicPath = decodedToken.picture;
-
-
-    console.log("Token Data:", { googleID: googleId, email, profilePicPath: profilePicPath?.substring(0, 30) + "..." });
-
-    if (!googleId || !email) {
-      setAuthLoading(false);
-      alert("Big fucking error!");
-      return;
-    }
 
     try {
-      const loginPayload = { googleId, email, profilePicPath }
-      const fetchedUser = await loginWithGoogle(loginPayload);
+      const fetchedUser = await loginWithGoogle({ idToken });
 
-      if (!fetchedUser?._id) {
-        console.error("Login Error: Invalid user data received from backend.");
-        throw new Error("Invalid user data received after login.");
+      if (!fetchedUser._id) {
+        console.error("Login error: Invalid user data recieved. User or _id is null.");
+        throw new Error("Invalid user data recieved after login.");
       }
 
       localStorage.setItem(LOCAL_STORAGE_USER_ID_KEY, fetchedUser._id);
@@ -195,7 +203,7 @@ function App() {
     const userId = localStorage.getItem(LOCAL_STORAGE_USER_ID_KEY);
     if (!userId) {
       console.log("No user ID found in local storage.");
-      fetchAndProcessPosts();
+      setAppUser(null);
       return;
     }
     
@@ -204,17 +212,16 @@ function App() {
     try {
       const user = await getUserDataById(userId);
       setAppUser(user);
+      fetchAndProcessPosts();
     } catch (error) {
       console.error("Error restoring user session:", error);
       localStorage.removeItem(LOCAL_STORAGE_USER_ID_KEY); // Clear bad/invalid ID
       setAppUser(null);
     } finally {
       setAuthLoading(false);
-      fetchAndProcessPosts();
     }
   }, [fetchAndProcessPosts]);
 
-  
   // create a post
   const toggleCreatePostPopup = () => {
     setIsCreatePostPopupOpen(prev => !prev);
@@ -255,71 +262,66 @@ function App() {
   }, [appUser, fetchAndProcessPosts]);
 
   useEffect(() => {
-    console.log("App Mounted. Restoring session and fetching posts...");
-    restoreUserSession();
-  }, [restoreUserSession]); // Run only when restoreUserSession identity changes
+    console.log("App Mounted. Waiting for Client ID then restoring session...");
+    if (!clientIdLoading && !clientIdError) {
+      console.log("Client ID loaded, restoring user session and fetching posts...");
+      restoreUserSession(); // This calls fetchAndProcessPosts internally
+    } else if (clientIdError) {
+      console.warn("Client ID failed to load, cannot restore session requiring auth calls.");
+    }
+  }, [clientIdLoading, clientIdError, restoreUserSession]);
   
-
-
-
   return (
-    <GoogleOAuthProvider clientId={googleClientId}>
+    <GoogleOAuthProvider clientId={googleClientId!!}>
       <div className="App">
         <SideBar 
           currentUser={appUser} 
           onAddPostClick={toggleCreatePostPopup}
           onLoginSuccess={handleLoginSuccess}
           onLoginError={handleLoginError}
-         />
+        />
         
         <div className="main-content">
-        <Navbar 
-          user={appUser}
-          authLoading={authLoading}
-          onLoginSuccess={handleLoginSuccess}
-          onLoginError={handleLoginError}
-          onLogout={handleLogout}
+          <Navbar 
+            user={appUser}
+            authLoading={authLoading}
+            onLoginSuccess={handleLoginSuccess}
+            onLoginError={handleLoginError}
+            onLogout={handleLogout}
           />
-        <Routes>
-        <Route path="/" element={
-        <div className="Posts">
-          {postsLoading ? <p>Loading posts...</p> : 
-          posts.length > 0 ? (
-          <PostFeed 
-            posts={posts} 
-            appUser={appUser}
-            userCache={userCache}
-            />
-          ) : (
-            <p>No posts available. Be the first to create one!</p>
-          )
-        }
+          <Routes>
+            <Route path="/" element={
+              <div className="Posts">
+                {postsLoading ? <p>Loading posts...</p> : 
+                  posts.length > 0 ? (
+                    <PostFeed 
+                      posts={posts} 
+                      appUser={appUser}
+                      userCache={userCache}
+                    />
+                  ) : (
+                    <p>No posts available. Be the first to create one!</p>
+                  )
+                }
+              </div>
+            } />
+            <Route path="/explore" element={
+              <ExplorePage 
+                posts={sortedPosts} 
+                postsLoading={postsLoading} 
+                appUser={appUser} 
+                userCache={userCache} 
+              />
+            } />
+            <Route path="/profile/:userId" element={<ProfilePage appUser={appUser} userCache={userCache || {}} />} />
+          </Routes>
         </div>
-      } />
-        <Route path="/explore" element={
-          <div className="Posts">
-            {postsLoading ? <p>Loading posts...</p> : 
-            posts.length > 0 ? (
-            <PostFeed 
-              posts={sortedPosts} 
-              appUser={appUser}
-              userCache={userCache}
-            />
-            ) : ( 
-            <p>No posts available. Be the first to create one!</p> 
-            )
-            }
-          </div>
-        } />
-              <Route path="/profile/:userId" element={<Profile appUser={appUser} userCache={userCache || {}} />} />
-        </Routes>
-      </div>
 
-      <CreatePostPopup 
-            isOpen={isCreatePostPopupOpen}
-            onClose={toggleCreatePostPopup}
-            onPostSubmit={handleCreatePostSubmit}
-            />
+        <CreatePostPopup 
+          isOpen={isCreatePostPopupOpen}
+          onClose={toggleCreatePostPopup}
+          onPostSubmit={handleCreatePostSubmit}
+        />
       </div>
     </GoogleOAuthProvider>
   );
