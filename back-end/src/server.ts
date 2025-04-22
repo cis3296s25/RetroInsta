@@ -1,3 +1,5 @@
+console.log(">>> [App Runner] Debug starting...");
+
 import express, { Express, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import http from 'http'; // Import http to type the 'server' variable if needed

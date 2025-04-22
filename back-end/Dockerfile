@@ -1,6 +1,6 @@
 # ---- Builder Stage ----
 # Build the TypeScript code
-FROM node:18-alpine AS builder
+FROM node:slim AS builder
 WORKDIR /app
 
 # Copy package files and install ALL dependencies (including dev)
@@ -17,7 +17,7 @@ RUN npm run build
 
 # ---- Production Stage ----
 # Create the final, smaller image
-FROM node:18-alpine
+FROM node:slim
 WORKDIR /app
 
 # Copy package files
@@ -28,8 +28,6 @@ RUN npm ci --omit=dev
 
 # Copy the compiled code from the builder stage
 COPY --from=builder /app/dist ./dist
-
-COPY ./seed-images ./seed-images
 
 # Expose the port the app runs on
 EXPOSE 7005

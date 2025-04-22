@@ -1,0 +1,37 @@
+FROM node:slim AS builder
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY . .
+
+ARG VITE_BACKEND_URL
+ARG VITE_GOOGLE_CLIENT_ID
+ENV VITE_BACKEND_URL=${VITE_BACKEND_URL}
+ENV VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID}
+RUN test -n "$VITE_BACKEND_URL" || (echo "Error: VITE_BACKEND_URL build-arg is required." && exit 1)
+RUN test -n "$VITE_GOOGLE_CLIENT_ID" || (echo "Error: VITE_GOOGLE_CLIENT_ID build-arg is required." && exit 1)
+
+# Build the React app for production
+RUN npm run build
+# Static assets are now in /app/dist
+
+# ---- Production Stage ----
+FROM nginx:stable-alpine
+WORKDIR /usr/share/nginx/html
+
+# Remove default Nginx welcome page
+RUN rm -rf ./*
+
+# Copy static assets from the build stage
+COPY --from=builder /app/dist .
+
+# Copy custom Nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Expose Nginx port
+EXPOSE 80
+
+# Start Nginx in the foreground
+CMD ["nginx", "-g", "daemon off;"]

@@ -3,6 +3,9 @@ import { MONGO_URI, POSTS_COLLECTION, USERS_COLLECTION } from '../config/config.
 
 export const connectDB = async (): Promise<void> => {
   try {
+    if (!MONGO_URI) {
+      throw new Error("MONGO_URI is not defined in the configuration.");
+    }
     await mongoose.connect(MONGO_URI);
     console.log("Successfully connected to MongoDB.");
 
