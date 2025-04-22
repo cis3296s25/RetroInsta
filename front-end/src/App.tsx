@@ -17,11 +17,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 const LOCAL_STORAGE_USER_ID_KEY = 'user_id'
 
-const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
-if (!googleClientId) {
-  console.error("Error. VITE_GOOGLE_CLIENT_ID env variable not set.")
-}
-
 function App() {
   const [posts, setPosts] = useState<DisplayPost[]>([]);
   const [postsLoading, setPostsLoading] = useState(true);
