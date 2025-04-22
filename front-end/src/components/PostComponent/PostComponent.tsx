@@ -1,11 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import "./PostComponent.css";
 import { DisplayPost } from "../../models/Post";
-import { toggleFollowUser } from '../../api/users';
 import { User } from "../../models/User";
 import { toggleLikePost } from "../../api/posts";
 import CommentSection from "../CommentSection/CommentSection";
-import FollowButton from "../FollowButton/FollowButton";
+import { Link } from 'react-router-dom'; 
 
 interface PostComponentProps {
   post: DisplayPost;
@@ -17,7 +16,6 @@ const PostComponent: React.FC<PostComponentProps> = ({ post, appUser, userCache 
   const { author, imagePath, description, likes: initialLikes, createdAt } = post;
   const username = author?.username || "Unknown User";
   const profilePicPath = author?.profilePicPath;
-  const currentUserId = appUser?._id || "notLoggedIn";
 
   const [likes, setLikes] = useState(initialLikes);
   const [isLiked, setIsLiked] = useState(
@@ -48,19 +46,21 @@ const PostComponent: React.FC<PostComponentProps> = ({ post, appUser, userCache 
 
   return (
     <div className="post">
-      <div className="post-header">
-        {profilePicPath ? (
-            <img className="avatar" src={profilePicPath} alt={`${username}'s avatar`} />
-          ) : (
-            <div className="avatar-placeholder">👤</div> // Placeholder if no pic
-          )}
-          <span className="username">{username}</span>
-          
-          <FollowButton 
-            appUser={appUser}
-            targetUserID={author._id}
-          />
-      </div>
+      <Link 
+        to={author._id ? `/profile/${author._id}` : "/login"} 
+        className="post-header-link" 
+      >
+        <div className="post-header">
+          {/* Post header is a link to author's profile */}
+            {profilePicPath ? (
+              <img className="avatar" src={profilePicPath} alt={`${username}'s avatar`} />
+            ) : (
+              <div className="avatar-placeholder">👤</div> // Placeholder if no pic
+            )}
+            <span className="username">{username}</span>
+        
+        </div>
+      </Link>
 
       {imagePath ? (
         <img className="post-image" src={imagePath} alt={`Post by ${username}`} />
@@ -85,14 +85,12 @@ const PostComponent: React.FC<PostComponentProps> = ({ post, appUser, userCache 
           </div>
 
           {/* Comment section */}
-          {appUser && (
-            <CommentSection
-              postID={post._id}
-              currentUser={appUser}
-              userCache={userCache || { current: {} }} // Provide a default empty cache
-              imagePath={imagePath}
-            />
-          )}
+          <CommentSection
+            postID={post._id}
+            currentUser={appUser}
+            userCache={userCache || { current: {} }} // Provide a default empty cache
+            imagePath={imagePath}
+          />
         </div>
         <div className="timestamp">{timestamp}</div>
       </div>
