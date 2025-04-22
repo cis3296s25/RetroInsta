@@ -58,7 +58,6 @@ const PostComponent: React.FC<PostComponentProps> = ({ post, appUser, userCache 
               <div className="avatar-placeholder">👤</div> // Placeholder if no pic
             )}
             <span className="username">{username}</span>
-        
         </div>
       </Link>
 
@@ -91,8 +90,8 @@ const PostComponent: React.FC<PostComponentProps> = ({ post, appUser, userCache 
             userCache={userCache || { current: {} }} // Provide a default empty cache
             imagePath={imagePath}
           />
+          <div className="timestamp">{timestamp}</div>
         </div>
-        <div className="timestamp">{timestamp}</div>
       </div>
     </div>
   );
