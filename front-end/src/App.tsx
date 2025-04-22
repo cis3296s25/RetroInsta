@@ -4,16 +4,16 @@ import PostFeed from "./components/PostFeed/PostFeed";
 import CreatePostPopup from "./components/CreatePostPopup/CreatePostPopup";
 import SideBar from "./components/SideBar/SideBar";
 import ProfilePage from "./pages/ProfilePage/ProfilePage";
+import ExplorePage from "./pages/ExplorePage";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DisplayPost, BackendPost } from "./models/Post"
 import { CreatePostPayload, PostFormData } from './models/CreatePostData';
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import { GoogleIdTokenPayload } from './models/GoogleIdTokenPayload';
 import { User } from './models/User';
 import { createPost, getAllPosts } from './api/posts';
 import { fetchGoogleClientId, loginWithGoogleApi as loginWithGoogle } from './api/auth';
 import { getUserById, getUserById as getUserDataById } from './api/users';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 
 const LOCAL_STORAGE_USER_ID_KEY = 'user_id'
 
@@ -279,56 +279,49 @@ function App() {
           onAddPostClick={toggleCreatePostPopup}
           onLoginSuccess={handleLoginSuccess}
           onLoginError={handleLoginError}
-         />
+        />
         
-         <div className="main-content">
-         <Navbar 
-           user={appUser}
-           authLoading={authLoading}
-           onLoginSuccess={handleLoginSuccess}
-           onLoginError={handleLoginError}
-           onLogout={handleLogout}
-           />
-         <Routes>
-          <Route path="/" element={
-            <div className="Posts">
-              {postsLoading ? <p>Loading posts...</p> : 
-                posts.length > 0 ? (
-                  <PostFeed 
-                    posts={posts} 
-                    appUser={appUser}
-                    userCache={userCache}
-                  />
-                ) : (
-                  <p>No posts available. Be the first to create one!</p>
-                )
-              }
-            </div>
-          } />
-          <Route path="/explore" element={
-            <div className="Posts">
-              {postsLoading ? <p>Loading posts...</p> : 
-              posts.length > 0 ? (
-              <PostFeed 
+        <div className="main-content">
+          <Navbar 
+            user={appUser}
+            authLoading={authLoading}
+            onLoginSuccess={handleLoginSuccess}
+            onLoginError={handleLoginError}
+            onLogout={handleLogout}
+          />
+          <Routes>
+            <Route path="/" element={
+              <div className="Posts">
+                {postsLoading ? <p>Loading posts...</p> : 
+                  posts.length > 0 ? (
+                    <PostFeed 
+                      posts={posts} 
+                      appUser={appUser}
+                      userCache={userCache}
+                    />
+                  ) : (
+                    <p>No posts available. Be the first to create one!</p>
+                  )
+                }
+              </div>
+            } />
+            <Route path="/explore" element={
+              <ExplorePage 
                 posts={sortedPosts} 
-                appUser={appUser}
-                userCache={userCache}
+                postsLoading={postsLoading} 
+                appUser={appUser} 
+                userCache={userCache} 
               />
-              ) : ( 
-              <p>No posts available. Be the first to create one!</p> 
-              )
-              }
-            </div>
-          } />
-          <Route path="/profile/:userId" element={<ProfilePage appUser={appUser} userCache={userCache || {}} />} />
-        </Routes>
-      </div>
+            } />
+            <Route path="/profile/:userId" element={<ProfilePage appUser={appUser} userCache={userCache || {}} />} />
+          </Routes>
+        </div>
 
-      <CreatePostPopup 
-            isOpen={isCreatePostPopupOpen}
-            onClose={toggleCreatePostPopup}
-            onPostSubmit={handleCreatePostSubmit}
-            />
+        <CreatePostPopup 
+          isOpen={isCreatePostPopupOpen}
+          onClose={toggleCreatePostPopup}
+          onPostSubmit={handleCreatePostSubmit}
+        />
       </div>
     </GoogleOAuthProvider>
   );
