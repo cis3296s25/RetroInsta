@@ -31,14 +31,12 @@ echo "==> Authenticating Docker with ECR in ${AWS_REGION}"
 aws ecr get-login-password --region "${AWS_REGION}" | docker login --username AWS --password-stdin "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
 # 5. Build the image using Legacy Builder
-echo "==> Building image with legacy builder (DOCKER_BUILDKIT=0)..."
-export DOCKER_BUILDKIT=0
+echo "==> Building image ..."
 docker build \
   --no-cache \
   -t "${ECR_URI}:${UNIQUE_TAG}" \
   -t "${ECR_URI}:latest" \
   . # Build context is current directory (.) which IS the back-end directory
-unset DOCKER_BUILDKIT
 echo "==> Build complete."
 
 # 6. Push the Unique Tag
