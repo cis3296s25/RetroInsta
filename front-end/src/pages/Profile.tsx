@@ -3,10 +3,11 @@ import { useParams } from 'react-router-dom';
 import { User } from '../models/User';
 import { BackendPost, DisplayPost } from '../models/Post';
 import { getUserById } from '../api/users';
-import { getAllPosts } from '../api/posts';
+import { getAllPosts, getPostsByUserId } from '../api/posts';
 import PostFeed from '../components/PostFeed/PostFeed';
 import './Profile.css';
 import FollowButton from '../components/FollowButton/FollowButton';
+import { convertBackendPostToDisplayPost } from '../utils/postUtils';
 
 interface ProfileProps {
   appUser: User | null
@@ -28,23 +29,16 @@ const Profile: React.FC<ProfileProps> = ({ appUser, userCache }) => {
           return;
         }
 
-        const [userData, allPosts] = await Promise.all([
+        const [userData, userBackendPosts] = await Promise.all([
           getUserById(userId),
-          getAllPosts()
+          getPostsByUserId(userId) 
         ]);
 
         setUser(userData);
         
-        // Convert BackendPost to DisplayPost
-        const userPosts: DisplayPost[] = allPosts
-          .filter(post => post.authorID === userId)
-          .map(post => {
-            const { authorID, ...rest } = post;
-            return {
-              ...rest,
-              author: userData
-            };
-          });
+        const userPosts: DisplayPost[] = userBackendPosts
+            .map(backendPost => convertBackendPostToDisplayPost(backendPost, userData))
+            .filter((post): post is DisplayPost => post !== null); // Filter out nulls if conversion failed
         
         setPosts(userPosts);
       } catch (err) {
