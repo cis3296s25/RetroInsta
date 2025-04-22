@@ -81,11 +81,13 @@ const Profile: React.FC<ProfileProps> = ({ appUser, userCache }) => {
           />
         </div>
         <div className="profile-info">
-          <h1 className="profile-username">{user.username}</h1>
-          <FollowButton
-            appUser={appUser}
-            targetUserID={userId}
-          />
+          <div className='profile-name-follow'>
+            <h1 className="profile-username">{user.username}</h1>
+            <FollowButton
+              appUser={appUser}
+              targetUserID={userId}
+            />
+          </div>
           {user.bio && <p className="profile-bio">{user.bio}</p>}
           <div className="profile-stats">
             <div className="stat">
