@@ -13,6 +13,7 @@ import { createPost, getAllPosts } from './api/posts';
 import { fetchGoogleClientId, loginWithGoogleApi as loginWithGoogle } from './api/auth';
 import { getUserById, getUserById as getUserDataById } from './api/users';
 import { Routes, Route } from 'react-router-dom';
+import { convertBackendPostsToDisplayPosts } from './utils/postUtils';
 
 const LOCAL_STORAGE_USER_ID_KEY = 'user_id'
 
@@ -69,9 +70,10 @@ function App() {
 
       // --- User Fetching with Cache ---
       const uniqueAuthorIDs = [
-        ...new Set(backendPosts
-          .map(post => post.authorID)
-          .filter((id): id is string => typeof id === 'string' && /^[0-9a-fA-F]{24}$/.test(id))
+        ...new Set(
+          backendPosts
+            .map(post => post.authorID)
+            .filter((id): id is string => typeof id === 'string' && /^[0-9a-fA-F]{24}$/.test(id))
         )
       ];
 
@@ -123,25 +125,12 @@ function App() {
       const allUsersMap: Record<string, User> = { ...usersFromCache, ...fetchedUsers };
       // --- End User Fetching with Cache ---
 
-
       // --- Process Posts ---
-      const processedPosts: DisplayPost[] = backendPosts
-        .map(post => {
-          const author = allUsersMap[post.authorID]; // Use the combined map
-          if (!author) {
-            // This should happen less often now, only if getUserById failed and wasn't cached
-            console.warn(`Author ${post.authorID} not found for post ${post._id}. Skipping post.`);
-            return null;
-          }
-          const { authorID, ...restOfPost } = post;
-          return { ...restOfPost, author };
-        })
-        .filter((p): p is DisplayPost => p !== null);
+      const processedPosts: DisplayPost[] = convertBackendPostsToDisplayPosts(backendPosts, allUsersMap);
 
       console.log(`Processed ${processedPosts.length} posts to display.`);
       setPosts(processedPosts);
       setSortedPosts(sortPostsByLikes(processedPosts));
-      
       // --- End Process Posts ---
 
     } catch (error) {
@@ -151,7 +140,7 @@ function App() {
     } finally {
       setPostsLoading(false);
     }
-  }, [sortPostsByLikes]); 
+  }, [sortPostsByLikes]);
 
   useEffect(() => {
     console.log("App Mounted: Triggering initial post fetch.");
