@@ -91,21 +91,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({
           💬
         </span>
         <span className="comment-count">{comments.length}</span>
-        <input
-          type="text"
-          className="comment-input"
-          placeholder="Write a comment..."
-          value={comment}
-          onChange={handleCommentChange}
-        />
-        <button
-          className="comment-submit"
-          onClick={handleCommentSubmit}
-          aria-label="Submit comment"
-          disabled={!comment.trim()}
-        >
-          Post
-        </button>
       </div>
 
       {showCommentsPopup && (
