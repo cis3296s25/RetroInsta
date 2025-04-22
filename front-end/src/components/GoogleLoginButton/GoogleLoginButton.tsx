@@ -1,24 +1,14 @@
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
-import { jwtDecode, JwtPayload } from 'jwt-decode';
-
-interface GoogleIdTokenPayload extends JwtPayload {
-  email?: string;
-  email_verified?: boolean;
-  name?: string;
-  picture?: string;
-  given_name?: string;
-  family_name?: string;
-}
 
 interface GoogleLoginButtonProps {
-  onLoginSuccess: (decodedToken: GoogleIdTokenPayload, credentialResponse: CredentialResponse) => void;
+  onLoginSuccess: (idToken: string) => void;
   onLoginError: () => void;
 }
 
 export default function GoogleLoginButton({ onLoginSuccess, onLoginError }: GoogleLoginButtonProps) {
 
   const handleSuccess = (credentialResponse: CredentialResponse) => {
-    console.log("Google login success. Credential response: ", credentialResponse);
+    console.log("Google login success. Credential response recieved.");
     const idToken = credentialResponse.credential;
 
     if (!idToken) {
@@ -28,16 +18,7 @@ export default function GoogleLoginButton({ onLoginSuccess, onLoginError }: Goog
         return;
     }
 
-    console.log("ID token JWT: ", idToken);
-    try {
-      const decodedToken = jwtDecode<GoogleIdTokenPayload>(idToken);
-      console.log("decoded token:", decodedToken);
-      onLoginSuccess(decodedToken, credentialResponse);
-    } catch (error) {
-      console.error("error decoding JWT token:", error);
-      alert("Failed to process login info");
-      onLoginError();
-    }
+    onLoginSuccess(idToken);
   };
 
   const handleError = () => {

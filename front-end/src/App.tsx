@@ -11,7 +11,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { GoogleIdTokenPayload } from './models/GoogleIdTokenPayload';
 import { User } from './models/User';
 import { createPost, getAllPosts } from './api/posts';
-import { loginWithGoogleApi as loginWithGoogle } from './api/auth';
+import { fetchGoogleClientId, loginWithGoogleApi as loginWithGoogle } from './api/auth';
 import { getUserById, getUserById as getUserDataById } from './api/users';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
@@ -29,6 +29,27 @@ function App() {
   const [authLoading, setAuthLoading] = useState(false)
   const [isCreatePostPopupOpen, setIsCreatePostPopupOpen] = useState(false);
   const [sortedPosts, setSortedPosts] = useState<DisplayPost[]>([]);
+
+  // for Google Client ID
+  const [googleClientId, setGoogleClientId] = useState<string | null>(null);
+  const [clientIdLoading, setClientIdLoading] = useState(true);
+  const [clientIdError, setClientIdError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadClientID = async () => {
+      setClientIdLoading(true);
+      setClientIdError(null);
+      try {
+        setGoogleClientId(await fetchGoogleClientId());
+      } catch (error) {
+        console.error("Failed to load Google Client ID:", error);
+        setClientIdError("Could not initialize Google Login. Please try reloading the page.")
+      } finally {
+        setClientIdLoading(false);
+      }
+    };
+    loadClientID()
+  }, []);
 
   const userCache = useRef<Record<string, User>>({});
 
@@ -137,6 +158,11 @@ function App() {
       setPostsLoading(false);
     }
   }, [sortPostsByLikes]); 
+
+  useEffect(() => {
+    console.log("App Mounted: Triggering initial post fetch.");
+    fetchAndProcessPosts();
+  }, [fetchAndProcessPosts]);
   
   // login state
   const handleLogout = useCallback(() => {
@@ -152,29 +178,16 @@ function App() {
     setPosts([]);
   }, []);
   
-  const handleLoginSuccess = useCallback(async (decodedToken: GoogleIdTokenPayload) => {
+  const handleLoginSuccess = useCallback(async (idToken: string) => {
     console.log("Attempting Google login...");
     setAuthLoading(true);
-    const googleId = decodedToken.sub;
-    const email = decodedToken.email;
-    const profilePicPath = decodedToken.picture;
-
-
-    console.log("Token Data:", { googleID: googleId, email, profilePicPath: profilePicPath?.substring(0, 30) + "..." });
-
-    if (!googleId || !email) {
-      setAuthLoading(false);
-      alert("Big fucking error!");
-      return;
-    }
 
     try {
-      const loginPayload = { googleId, email, profilePicPath }
-      const fetchedUser = await loginWithGoogle(loginPayload);
+      const fetchedUser = await loginWithGoogle({ idToken });
 
-      if (!fetchedUser?._id) {
-        console.error("Login Error: Invalid user data received from backend.");
-        throw new Error("Invalid user data received after login.");
+      if (!fetchedUser._id) {
+        console.error("Login error: Invalid user data recieved. User or _id is null.");
+        throw new Error("Invalid user data recieved after login.");
       }
 
       localStorage.setItem(LOCAL_STORAGE_USER_ID_KEY, fetchedUser._id);
@@ -195,7 +208,7 @@ function App() {
     const userId = localStorage.getItem(LOCAL_STORAGE_USER_ID_KEY);
     if (!userId) {
       console.log("No user ID found in local storage.");
-      fetchAndProcessPosts();
+      setAppUser(null);
       return;
     }
     
@@ -204,17 +217,16 @@ function App() {
     try {
       const user = await getUserDataById(userId);
       setAppUser(user);
+      fetchAndProcessPosts();
     } catch (error) {
       console.error("Error restoring user session:", error);
       localStorage.removeItem(LOCAL_STORAGE_USER_ID_KEY); // Clear bad/invalid ID
       setAppUser(null);
     } finally {
       setAuthLoading(false);
-      fetchAndProcessPosts();
     }
   }, [fetchAndProcessPosts]);
 
-  
   // create a post
   const toggleCreatePostPopup = () => {
     setIsCreatePostPopupOpen(prev => !prev);
@@ -255,15 +267,17 @@ function App() {
   }, [appUser, fetchAndProcessPosts]);
 
   useEffect(() => {
-    console.log("App Mounted. Restoring session and fetching posts...");
-    restoreUserSession();
-  }, [restoreUserSession]); // Run only when restoreUserSession identity changes
+    console.log("App Mounted. Waiting for Client ID then restoring session...");
+    if (!clientIdLoading && !clientIdError) {
+      console.log("Client ID loaded, restoring user session and fetching posts...");
+      restoreUserSession(); // This calls fetchAndProcessPosts internally
+    } else if (clientIdError) {
+      console.warn("Client ID failed to load, cannot restore session requiring auth calls.");
+    }
+  }, [clientIdLoading, clientIdError, restoreUserSession]);
   
-
-
-
   return (
-    <GoogleOAuthProvider clientId={googleClientId}>
+    <GoogleOAuthProvider clientId={googleClientId!!}>
       <div className="App">
         <SideBar 
           currentUser={appUser} 
@@ -272,17 +286,17 @@ function App() {
           onLoginError={handleLoginError}
          />
         
-        <div className="main-content">
-        <Navbar 
-          user={appUser}
-          authLoading={authLoading}
-          onLoginSuccess={handleLoginSuccess}
-          onLoginError={handleLoginError}
-          onLogout={handleLogout}
-          />
-        <Routes>
-        <Route path="/" element={
-        <div className="Posts">
+         <div className="main-content">
+         <Navbar 
+           user={appUser}
+           authLoading={authLoading}
+           onLoginSuccess={handleLoginSuccess}
+           onLoginError={handleLoginError}
+           onLogout={handleLogout}
+           />
+         <Routes>
+         <Route path="/" element={
+         <div className="Posts">
           {postsLoading ? <p>Loading posts...</p> : 
           posts.length > 0 ? (
           <PostFeed 
