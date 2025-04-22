@@ -46,20 +46,19 @@ const PostComponent: React.FC<PostComponentProps> = ({ post, appUser, userCache 
 
   return (
     <div className="post">
-      <Link 
-        to={author._id ? `/profile/${author._id}` : "/login"} 
-        className="post-header-link" 
-      >
         <div className="post-header">
+        <a href={`/profile/${author?._id}`} className="avatar-link">
           {/* Post header is a link to author's profile */}
             {profilePicPath ? (
               <img className="avatar" src={profilePicPath} alt={`${username}'s avatar`} />
             ) : (
               <div className="avatar-placeholder">👤</div> // Placeholder if no pic
             )}
-            <span className="username">{username}</span>
-        </div>
-      </Link>
+          </a>
+          <a href={`/profile/${author?._id}`} className="username">
+          {username}
+          </a>
+      </div>
 
       {imagePath ? (
         <img className="post-image" src={imagePath} alt={`Post by ${username}`} />
