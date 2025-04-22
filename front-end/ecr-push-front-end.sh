@@ -12,7 +12,6 @@ set -e # Exit immediately if a command exits with a non-zero status.
 # 1. Get Required Build Arguments (Prompt user or use defaults)
 #    You MUST provide these values for the build to work correctly.
 read -p "Enter VITE_BACKEND_URL (App Runner backend URL): " VITE_BACKEND_URL
-
 if [[ -z "${VITE_BACKEND_URL}" ]]; then
   echo "ERROR: VITE_BACKEND_URL build argument is required." >&2
   exit 1
