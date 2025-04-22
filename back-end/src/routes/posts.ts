@@ -47,6 +47,36 @@ router.get('/user/:userId', async (req: Request, res: Response) => {
   }
 });
 
+// GET /api/posts/user/:useId/following
+router.get('/user/:userId/following', async (req: Request, res: Response) => {
+  const { userId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ error: "Invalid user ID." });
+  }
+
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (user.authoredPostIDs.length === 0) {
+      return res.json([]);
+    }
+
+    const posts: IPost[] = await Post.find({
+      'authorID': { $in: user.followingUserIDs }
+    }).sort({ createdAt: -1});
+
+    res.json(posts);
+  } catch(error) {
+    console.error(`Error fetching following posts for user ${userId}`, error);
+    res.status(500).json({ error: "Internal server error fetching user's following posts" });
+  }
+});
+
 // POST /api/posts
 router.post('/', upload.single("imagePath"), async (req: Request, res: Response) => {
   try {
