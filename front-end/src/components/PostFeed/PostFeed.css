@@ -22,3 +22,10 @@ h1 {
 body {
   padding-top: 60px; /* Match the height of the Navbar */
 }
+
+@media (max-width: 800px) {
+  .feed {  
+    max-width: 350px;
+  }
+}
+
