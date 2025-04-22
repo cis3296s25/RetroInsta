@@ -1,20 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { User } from '../models/User';
-import { BackendPost, DisplayPost } from '../models/Post';
-import { getUserById } from '../api/users';
-import { getAllPosts, getPostsByUserId } from '../api/posts';
-import PostFeed from '../components/PostFeed/PostFeed';
-import './Profile.css';
-import FollowButton from '../components/FollowButton/FollowButton';
-import { convertBackendPostToDisplayPost } from '../utils/postUtils';
+import { User } from '../../models/User';
+import { BackendPost, DisplayPost } from '../../models/Post';
+import { getUserById } from '../../api/users';
+import { getAllPosts, getPostsByUserId } from '../../api/posts';
+import PostFeed from '../../components/PostFeed/PostFeed';
+import './ProfilePage.css';
+import FollowButton from '../../components/FollowButton/FollowButton';
+import { convertBackendPostToDisplayPost } from '../../utils/postUtils';
 
 interface ProfileProps {
   appUser: User | null
   userCache: Record<string, User>;
 }
 
-const Profile: React.FC<ProfileProps> = ({ appUser, userCache }) => {
+const ProfilePage: React.FC<ProfileProps> = ({ appUser, userCache }) => {
   const { userId } = useParams<{ userId: string }>();
   const [user, setUser] = useState<User | null>(null);
   const [posts, setPosts] = useState<DisplayPost[]>([]);
@@ -112,4 +112,4 @@ const Profile: React.FC<ProfileProps> = ({ appUser, userCache }) => {
   );
 };
 
-export default Profile;
+export default ProfilePage;

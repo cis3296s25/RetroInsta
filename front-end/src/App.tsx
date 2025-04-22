@@ -3,7 +3,7 @@ import Navbar from "./components/Navbar/Navbar";
 import PostFeed from "./components/PostFeed/PostFeed";
 import CreatePostPopup from "./components/CreatePostPopup/CreatePostPopup";
 import SideBar from "./components/SideBar/SideBar";
-import Profile from "./pages/Profile";
+import ProfilePage from "./pages/ProfilePage/ProfilePage";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DisplayPost, BackendPost } from "./models/Post"
 import { CreatePostPayload, PostFormData } from './models/CreatePostData';
@@ -320,7 +320,7 @@ function App() {
               }
             </div>
           } />
-          <Route path="/profile/:userId" element={<Profile appUser={appUser} userCache={userCache || {}} />} />
+          <Route path="/profile/:userId" element={<ProfilePage appUser={appUser} userCache={userCache || {}} />} />
         </Routes>
       </div>
 
