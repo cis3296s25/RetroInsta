@@ -3,6 +3,7 @@ import { Comment, AddCommentPayload } from "../../models/Post";
 import { getCommentsByPostId, addComment } from "../../api/comments";
 import { getUserById } from "../../api/users";
 import { User } from "../../models/User";
+import "./CommentSection.css";
 
 interface CommentSectionProps {
   postID: string;
@@ -110,7 +111,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
                     const username = commentUsernames[comment._id] || "Loading...";
                     return (
                       <div key={index} className="comment">
-                        <span className="comment-author">{username}: </span>
+                        <a href={`/profile/${comment.authorID}`} className="comment-author">{username}: </a>
                         <span className="comment-text">{comment.commentText}</span>
                       </div>
                     );
