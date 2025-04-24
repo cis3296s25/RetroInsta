@@ -5,12 +5,13 @@ import CreatePostPopup from "./components/CreatePostPopup/CreatePostPopup";
 import SideBar from "./components/SideBar/SideBar";
 import ProfilePage from "./pages/ProfilePage/ProfilePage";
 import ExplorePage from "./pages/ExplorePage";
+import HomePage from './pages/HomePage';
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DisplayPost, BackendPost } from "./models/Post"
 import { CreatePostPayload, PostFormData } from './models/CreatePostData';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { User } from './models/User';
-import { createPost, getAllPosts } from './api/posts';
+import { createPost, getAllPosts, fetchPersonalPosts } from './api/posts';
 import { fetchGoogleClientId, loginWithGoogleApi as loginWithGoogle } from './api/auth';
 import { getUserById, getUserById as getUserDataById } from './api/users';
 import { Routes, Route } from 'react-router-dom';
@@ -24,6 +25,7 @@ function App() {
   const [authLoading, setAuthLoading] = useState(false)
   const [isCreatePostPopupOpen, setIsCreatePostPopupOpen] = useState(false);
   const [sortedPosts, setSortedPosts] = useState<DisplayPost[]>([]);
+  const [personalPosts, setPersonalPosts] = useState<DisplayPost[]>([]);
 
   // for Google Client ID
   const [googleClientId, setGoogleClientId] = useState<string | null>(null);
@@ -55,6 +57,7 @@ function App() {
   const fetchAndProcessPosts = useCallback(async () => {
     console.log("Fetching posts...");
     setPostsLoading(true);
+    let finalPersonalPosts: DisplayPost[] = [];
 
     try {
       const backendPosts: BackendPost[] = await getAllPosts();
@@ -139,12 +142,50 @@ function App() {
         })
         .filter((p): p is DisplayPost => p !== null);
 
-      console.log(`Processed ${processedPosts.length} posts to display.`);
-      setPosts(processedPosts);
+      // --- Fetch Personal Posts (only if userID is assigned) ---
+
+      // Check if user is logged in using cached ID from localStorage
+      const usrID = localStorage.getItem(LOCAL_STORAGE_USER_ID_KEY);
+
+      if (usrID) {
+        try {
+          const personal = await fetchPersonalPosts(usrID);
+
+          const personalProcessed: DisplayPost[] = personal
+            .map(post => {
+              const author = allUsersMap[post.authorID];
+
+              if (!author) {
+                return null;
+              }
+
+              const { authorID, ...rest } = post;
+              const displayPost = { ...rest, author };
+              return displayPost;
+            })
+            .filter((p): p is DisplayPost => p !== null);
+
+          setPersonalPosts(personalProcessed);
+          finalPersonalPosts = personalProcessed;
+        } catch (error) {
+          console.error("Error fetching personal posts:", error);
+          setPersonalPosts([]);
+        }
+      } else {
+        console.log("UserID not found — skipping personal post fetch.");
+        setPersonalPosts([]); // Clear any previous personal posts
+      }
+      // --- End Fetch Personal Posts ---
+      
+      // Set posts to personal posts if they exist, otherwise regular posts
+      if (finalPersonalPosts.length > 0) {
+        setPosts(finalPersonalPosts);
+      } else {
+        setPosts(processedPosts);
+      }
       setSortedPosts(sortPostsByLikes(processedPosts));
       
       // --- End Process Posts ---
-
     } catch (error) {
       console.error("Error fetching or processing posts:", error);
       setPosts([]); // Clear posts on error
@@ -290,21 +331,14 @@ function App() {
             onLogout={handleLogout}
           />
           <Routes>
-            <Route path="/" element={
-              <div className="Posts">
-                {postsLoading ? <p>Loading posts...</p> : 
-                  posts.length > 0 ? (
-                    <PostFeed 
-                      posts={posts} 
-                      appUser={appUser}
-                      userCache={userCache}
-                    />
-                  ) : (
-                    <p>No posts available. Be the first to create one!</p>
-                  )
-                }
-              </div>
-            } />
+          <Route path="/" element={
+            <HomePage
+              posts={posts}
+              postsLoading={postsLoading}
+              appUser={appUser}
+              userCache={userCache}
+            />
+          } />
             <Route path="/explore" element={
               <ExplorePage 
                 posts={sortedPosts} 

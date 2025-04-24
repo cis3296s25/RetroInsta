@@ -132,4 +132,34 @@ router.patch('/:id/like', async (req: Request, res: Response) => {
   }
 });
 
+// GET /api/posts/personal/:userId - get user's posts + followed users' posts
+router.get('/personal/:userId', async (req: Request, res: Response) => {
+  const { userId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ error: "Invalid user ID." });
+  }
+
+  try {
+    const user = await User.findById(userId).populate('followingUserIDs');
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Build array of user IDs to get posts from
+    const relevantUserIds = [userId, ...user.followingUserIDs.map((u: any) => u._id)];
+
+    // Get all posts by the user and users they follow
+    const posts = await Post.find({
+      authorID: { $in: relevantUserIds }
+    }).sort({ createdAt: -1 });
+
+    res.json(posts);
+  } catch (error) {
+    console.error(`Error fetching personal feed for user ${userId}`, error);
+    res.status(500).json({ error: "Internal server error fetching personal posts" });
+  }
+});
+
 export default router;
