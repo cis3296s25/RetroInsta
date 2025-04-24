@@ -1,9 +1,9 @@
-// components/FollowingSidebar/FollowingSidebar.tsx
 import { useEffect, useState } from 'react';
 import { User } from '../../models/User';
 import { getUserById } from '../../api/users';
 import { Link } from 'react-router-dom';
 import './FollowingSidebar.css';
+import { toggleFollowUser } from '../../api/users';
 
 interface FollowingSidebarProps {
   currentUser: User;
@@ -45,14 +45,30 @@ const FollowingSidebar: React.FC<FollowingSidebarProps> = ({ currentUser, userCa
     <div className="following-sidebar">
       <h3>Following</h3>
       <ul>
-        {followingUsers.map(user => (
-          <li key={user._id}>
-            <Link to={`/profile/${user._id}`} className="following-user-link">
-              <img src={user.profilePicPath} alt={user.username} className="following-avatar" />
-              <span>{user.username}</span>
-            </Link>
-          </li>
-        ))}
+      {followingUsers.map(user => (
+  <li key={user._id} className="following-user-item">
+    <div className="following-user-info">
+      <Link to={`/profile/${user._id}`} className="following-user-link">
+        <img src={user.profilePicPath} alt={user.username} className="following-avatar" />
+        <span>{user.username}</span>
+      </Link>
+      <button
+        className="unfollow-button"
+        onClick={async () => {
+          try {
+            await toggleFollowUser(currentUser._id, user._id);
+            setFollowingUsers(prev => prev.filter(u => u._id !== user._id));
+          } catch (err) {
+            console.error('Failed to unfollow user:', err);
+            alert('Unfollow failed');
+          }
+        }}
+      >
+        Unfollow
+      </button>
+    </div>
+  </li>
+))}
       </ul>
     </div>
   );

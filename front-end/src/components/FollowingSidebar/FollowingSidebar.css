@@ -18,9 +18,9 @@
 .following-user-link {
   display: flex;
   align-items: center;
-  margin-bottom: 10px;
   text-decoration: none;
   color: inherit;
+  flex: 1; 
 }
 
 .following-avatar {
@@ -28,4 +28,34 @@
   height: 32px;
   border-radius: 50%;
   margin-right: 10px;
+}
+
+.following-user-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.following-user-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 0.5rem;
+}
+
+.unfollow-button {
+  background-color: lightblue;
+  border: none;
+  border-radius: 8px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+}
+
+.unfollow-button:hover {
+  background-color: blue;
 }
