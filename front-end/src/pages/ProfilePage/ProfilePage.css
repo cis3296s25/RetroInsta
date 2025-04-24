@@ -58,6 +58,69 @@
   line-height: 1.5;
 }
 
+.profile-bio-placeholder {
+  font-size: 16px;
+  color: #888; /* Light gray for placeholder text */
+  margin: 0 0 20px 0;
+  line-height: 1.5;
+}
+
+.update-bio-button {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.update-bio-button:hover {
+  background-color: #0056b3;
+}
+
+.bio-input {
+  width: 100%;
+  height: 80px;
+  margin-bottom: 10px;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  resize: none;
+}
+
+.save-bio-button,
+.cancel-bio-button {
+  margin-right: 10px;
+  padding: 8px 16px;
+  font-size: 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.save-bio-button {
+  background-color: #28a745;
+  color: white;
+}
+
+.save-bio-button:hover {
+  background-color: #218838;
+}
+
+.cancel-bio-button {
+  background-color: #dc3545;
+  color: white;
+}
+
+.cancel-bio-button:hover {
+  background-color: #c82333;
+}
+
 .profile-stats {
   display: flex;
   gap: 30px; /* Increased gap for stats */

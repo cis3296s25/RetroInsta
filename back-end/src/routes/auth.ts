@@ -67,7 +67,6 @@ router.post('/google/login', async (req: Request, res: Response) => {
   
     const newUser_Data = {
       googleId: googleId,
-      email: email,
       username: username,
       profilePicPath: profilePicPath
     };

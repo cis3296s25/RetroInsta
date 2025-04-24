@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { User } from '../../models/User';
 import { BackendPost, DisplayPost } from '../../models/Post';
-import { getUserById } from '../../api/users';
+import { getUserById, updateBio } from '../../api/users';
 import { getAllPosts, getPostsByUserId } from '../../api/posts';
 import PostFeed from '../../components/PostFeed/PostFeed';
 import './ProfilePage.css';
@@ -20,6 +20,8 @@ const ProfilePage: React.FC<ProfileProps> = ({ appUser, userCache }) => {
   const [posts, setPosts] = useState<DisplayPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isEditingBio, setIsEditingBio] = useState(false);
+  const [bioInput, setBioInput] = useState<string>(user?.bio || '');
 
   const fetchProfileData = async () => {
     try {
@@ -45,6 +47,18 @@ const ProfilePage: React.FC<ProfileProps> = ({ appUser, userCache }) => {
       console.error('Error fetching profile data:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUpdateBio = async () => {
+    if (!appUser || !appUser._id) return;
+
+    try {
+      await updateBio(appUser._id, bioInput);
+      setUser({ ...user!, bio: bioInput }); // update the local user state
+      setIsEditingBio(false); // exit editing
+    } catch (error) {
+      console.error('Failed to update bio:', error);
     }
   };
 
@@ -83,7 +97,38 @@ const ProfilePage: React.FC<ProfileProps> = ({ appUser, userCache }) => {
               onFollowToggleSuccess={() => fetchProfileData()}
             />
           </div>
-          {user.bio && <p className="profile-bio">{user.bio}</p>}
+          {isEditingBio ? (
+            <div className="edit-bio">
+              <textarea
+                className="bio-input"
+                value={bioInput}
+                onChange={(e) => setBioInput(e.target.value)}
+                placeholder="Enter your bio"
+              />
+              <button className="save-bio-button" onClick={handleUpdateBio}>
+                Save
+              </button>
+              <button className="cancel-bio-button" onClick={() => setIsEditingBio(false)}>
+                Cancel
+              </button>
+            </div>
+          ) : user.bio ? (
+            <p className="profile-bio">{user.bio}</p>
+          ) : (
+            appUser?._id === userId && (
+              <p className="profile-bio-placeholder">
+                You don't have a bio yet. Add one to let others know more about you!
+              </p>
+            )
+          )}
+          {appUser?._id === userId && !isEditingBio && (
+            <button 
+              className="update-bio-button" 
+              onClick={() => setIsEditingBio(true)}
+            >
+              Update Bio
+            </button>
+          )}
           <div className="profile-stats">
             <div className="stat">
               <span className="stat-value">{posts.length}</span>
