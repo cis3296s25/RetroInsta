@@ -22,8 +22,10 @@ const ProfilePage: React.FC<ProfileProps> = ({ appUser, userCache }) => {
   const [error, setError] = useState<string | null>(null);
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [bioInput, setBioInput] = useState<string>(user?.bio || '');
+  const [isSavingBio, setIsSavingBio] = useState(false);
 
   const fetchProfileData = async () => {
+    setLoading(true);
     try {
       if (!userId) {
         setError('No user ID provided');
@@ -36,6 +38,7 @@ const ProfilePage: React.FC<ProfileProps> = ({ appUser, userCache }) => {
       ]);
 
       setUser(userData);
+      setBioInput(userData.bio || '');
       
       const userPosts: DisplayPost[] = userBackendPosts
           .map(backendPost => convertBackendPostToDisplayPost(backendPost, userData))
@@ -51,7 +54,15 @@ const ProfilePage: React.FC<ProfileProps> = ({ appUser, userCache }) => {
   };
 
   const handleUpdateBio = async () => {
-    if (!appUser || !appUser._id) return;
+    if (!appUser || !appUser._id) {
+      setIsEditingBio(false); // close the editor
+      alert("You must be logged in to save your bio. Please log in again.");
+      return;
+    }
+
+    if (isSavingBio) return; // multiple clicks not allowed
+
+    setIsSavingBio(true);
 
     try {
       await updateBio(appUser._id, bioInput);
@@ -59,6 +70,8 @@ const ProfilePage: React.FC<ProfileProps> = ({ appUser, userCache }) => {
       setIsEditingBio(false); // exit editing
     } catch (error) {
       console.error('Failed to update bio:', error);
+    } finally {
+      setIsSavingBio(false);
     }
   };
 
