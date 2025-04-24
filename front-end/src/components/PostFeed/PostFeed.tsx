@@ -7,18 +7,22 @@ import { User } from "../../models/User";
 interface PostFeedProps {
   posts: DisplayPost[];
   appUser: User | null;
-  userCache?:React.RefObject<Record<string, User>>;
+  userCache?: React.MutableRefObject<Record<string, User>>; 
+  onUserUpdate?: () => void; 
+  postsLoading?: boolean;
 }
 
-const Feed: React.FC<PostFeedProps> = ({ posts, appUser, userCache }) => {
+
+const Feed: React.FC<PostFeedProps> = ({ posts, appUser, userCache, onUserUpdate }) => {
   return (
     <div className="feed">
       {posts.map((post) => (
-        <PostComponent 
-          key={post._id} 
+        <PostComponent
+          key={post._id}
           post={post}
           appUser={appUser}
-          userCache={userCache} 
+          userCache={userCache}
+          onUserUpdate={onUserUpdate} 
         />
       ))}
     </div>

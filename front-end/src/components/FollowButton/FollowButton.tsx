@@ -1,71 +1,62 @@
-import { useState } from "react";
-import { User } from '../../models/User'
+import { useState, useEffect } from "react";
+import { User } from '../../models/User';
 import { toggleFollowUser } from "../../api/users";
-import './FollowButton.css'
+import './FollowButton.css';
 
 interface FollowButtonProps {
-    appUser: User | null;
-    targetUserID: string | undefined;
-    onFollowToggleSuccess?: () => void;
+  appUser: User | null;
+  targetUserID: string | undefined;
+  onFollowToggleSuccess?: () => void;
+  onUserUpdate?: () => void;
 }
 
 const FollowButton: React.FC<FollowButtonProps> = ({
-    appUser,
-    targetUserID,
-    onFollowToggleSuccess
+  appUser,
+  targetUserID,
+  onFollowToggleSuccess,
+  onUserUpdate
 }) => {
-    // Don't show button if not logged in, no target, or it's the user themselves
-    if (!appUser || !targetUserID || appUser._id === targetUserID) {
-        return null; 
+  if (!appUser || !targetUserID || appUser._id === targetUserID) return null;
+
+  const [isFollowing, setIsFollowing] = useState(
+    appUser.followingUserIDs.includes(targetUserID)
+  );
+  const [isLoading, setIsLoading] = useState(false);
+
+  // 🔁 Sync when appUser or targetUserID changes
+  useEffect(() => {
+    setIsFollowing(appUser.followingUserIDs.includes(targetUserID));
+  }, [appUser, targetUserID]);
+
+  const handleFollowClick = async () => {
+    if (isLoading) return;
+
+    setIsLoading(true);
+    const originalState = isFollowing;
+    setIsFollowing(!originalState); 
+
+    try {
+      await toggleFollowUser(appUser._id, targetUserID);
+      onFollowToggleSuccess?.();
+      onUserUpdate?.(); 
+    } catch (error) {
+      console.error("Follow/unfollow failed:", error);
+      alert("Something went wrong. Please try again.");
+      setIsFollowing(originalState); 
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    const [isFollowing, setIsFollowing] = useState(
-        // initially set to whether targetUser is in appUser's following list
-        appUser?.followingUserIDs?.includes(targetUserID ?? '') || false
-    );
-    const [isLoading, setIsLoading] = useState(false);
-
-    const handleFollowClick = async() => {
-        if (isLoading) return; // prevent multiple clicks
-
-        setIsLoading(true);
-
-        const originalFollowState =  isFollowing
-
-        // optimistic ui update
-        setIsFollowing(!originalFollowState);
-
-        try {
-            await toggleFollowUser(appUser._id, targetUserID);
-
-            onFollowToggleSuccess?.();
-        } catch (error) {
-            console.error("Follow action failed:", error);
-            alert("Failed to update follow status. Please try again");
-            setIsFollowing(originalFollowState); // restore original
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const buttonClasses = [
-        'follow-button',
-        isFollowing ? 'following' : '',
-        isLoading ? 'loading' : ''
-    ].filter(Boolean).join(' ');
-
-    return (
-        <button
-            className={buttonClasses}
-            onClick={handleFollowClick}
-            disabled={isLoading}
-            style={{
-                marginLeft: "auto"
-            }}
-        >
-            {isFollowing ? "Following" : "Follow"}
-        </button>
-    );
+  return (
+    <button
+      className={`follow-button ${isFollowing ? "following" : ""}`}
+      onClick={handleFollowClick}
+      disabled={isLoading}
+    >
+      {isFollowing ? "Following" : "Follow"}
+    </button>
+  );
 };
 
 export default FollowButton;

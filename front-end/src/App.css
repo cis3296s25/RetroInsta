@@ -59,15 +59,16 @@
   display: flex;
   flex-direction: row;
   align-items: flex-start;
-  gap: 5rem; /* adds spacing between feed and sidebar */
+  gap: 5rem; 
 }
 
 .page-content {
-  flex: 1 1 auto;
-  min-width: 0;
-  padding: 2rem;
-  max-width: 100%; /* or 100% if you prefer full width */
+  margin: 0 auto;
+  width: 100%;
+  max-width: 1000px; 
 }
+
+
 
 
 .following-sidebar {
