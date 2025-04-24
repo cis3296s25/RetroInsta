@@ -49,78 +49,154 @@
   margin: 0;           /* Remove margin from h1 */
 }
 
-/* FollowButton component would go here in the flex row */
+.profile-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column; /* Keep this */
+  /* Ensure items align to the start (left) by default */
+  align-items: flex-start; /* Changed from default 'stretch' */
+}
 
-.profile-bio {
-  font-size: 16px;
+.profile-name-follow {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+  width: 100%; /* Ensure this row takes full width */
+}
+
+.profile-username {
+  font-size: 25px;
+  font-weight: 600;
   color: #262626;
-  margin: 0 0 20px 0; /* Keep margin below bio */
+  margin: 0; /* Keep margin reset */
+  /* Text alignment is naturally left */
+}
+
+.profile-bio,
+.profile-bio-placeholder {
+  font-size: 1rem;
+  color: #262626;
+  margin: 0 0 10px 0; /* Keep left margin 0 */
+  padding: 0; /* Ensure no extra padding */
   line-height: 1.5;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  text-align: left; /* Explicitly set text alignment */
+  width: 100%; /* Ensure paragraph takes full available width */
+  box-sizing: border-box; /* Include padding/border if any were added later */
 }
 
 .profile-bio-placeholder {
-  font-size: 16px;
-  color: #888; /* Light gray for placeholder text */
-  margin: 0 0 20px 0;
-  line-height: 1.5;
+  color: #8e8e8e;
+  text-align: left; /* Explicitly set text alignment */
 }
 
+/* --- Update Bio Button (when not editing) --- */
 .update-bio-button {
-  margin-top: 10px;
-  padding: 8px 16px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
+  margin-top: 5px;
+  padding: 5px 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-family: inherit;
+  background-color: #efefef;
+  color: #262626;
+  border: 1px solid #dbdbdb;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
   transition: background-color 0.2s ease;
+  margin-left: 0;
 }
 
 .update-bio-button:hover {
-  background-color: #0056b3;
+  background-color: #dbdbdb;
+}
+
+/* --- Edit Bio Section (when editing) --- */
+.edit-bio {
+  margin-top: 10px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start; /* Align textarea and button row to the left */
 }
 
 .bio-input {
+  /* Styles remain the same, ensure width: 100% */
   width: 100%;
-  height: 80px;
-  margin-bottom: 10px;
-  padding: 10px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  resize: none;
+  padding: 10px 12px;
+  font-size: 1rem;
+  font-family: inherit;
+  line-height: 1.4;
+  border: 1px solid #dbdbdb;
+  border-radius: 6px;
+  resize: vertical;
+  box-sizing: border-box;
+  background-color: #fafafa;
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
+.bio-input:focus {
+  outline: none;
+  border-color: #a8a8a8;
+}
+
+.edit-bio-actions {
+  display: flex; /* MUST be flex */
+  gap: 10px; /* Space between buttons */
+  width: 100%; /* Takes available width */
+  justify-content: flex-start; /* Explicitly set or rely on default */
+}
+
+/* Combine common styles for Save/Cancel buttons */
 .save-bio-button,
 .cancel-bio-button {
-  margin-right: 10px;
-  padding: 8px 16px;
-  font-size: 14px;
-  border: none;
-  border-radius: 4px;
+  padding: 8px 16px; /* Keep existing padding */
+  font-size: 0.9rem;
+  font-family: inherit;
+  font-weight: 600;
+  border: none; /* Common: no border base */
+  border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+  margin-right: 0; /* Remove old margin if any */
+  
+
+  /* --- Add these lines for equal width --- */
+  width: 90px; /* Adjust this value as needed for aesthetics */
+  text-align: center; /* Center the text inside the button */
+  box-sizing: border-box; /* Ensure padding is included in the width */
 }
 
+/* Specific styles for Save button */
 .save-bio-button {
-  background-color: #28a745;
+  background-color: #0095f6; /* Primary blue */
   color: white;
 }
 
 .save-bio-button:hover {
-  background-color: #218838;
+  background-color: #0077cc; /* Darker blue */
 }
 
+/* Specific styles for Cancel button */
 .cancel-bio-button {
-  background-color: #dc3545;
-  color: white;
+  background-color: #efefef; /* Light gray */
+  color: #262626;
+  border: 1px solid #dbdbdb; /* Add back the subtle border for Cancel */
 }
 
 .cancel-bio-button:hover {
-  background-color: #c82333;
+  background-color: #dbdbdb; /* Darker gray */
+}
+.profile-stats {
+  display: flex;
+  gap: 30px;
+  margin-top: 20px; /* Add some space above stats */
+  width: 100%; /* Ensure stats row takes full width */
 }
 
+/* ... rest of profile-stats, profile-posts styles ... */
 .profile-stats {
   display: flex;
   gap: 30px; /* Increased gap for stats */

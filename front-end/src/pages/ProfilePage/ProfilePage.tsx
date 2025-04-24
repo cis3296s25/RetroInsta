@@ -103,31 +103,43 @@ const ProfilePage: React.FC<ProfileProps> = ({ appUser, userCache }) => {
                 className="bio-input"
                 value={bioInput}
                 onChange={(e) => setBioInput(e.target.value)}
-                placeholder="Enter your bio"
+                placeholder="Tell us about yourself..." // Updated placeholder
+                rows={4} // Suggest a reasonable number of rows
               />
-              <button className="save-bio-button" onClick={handleUpdateBio}>
-                Save
-              </button>
-              <button className="cancel-bio-button" onClick={() => setIsEditingBio(false)}>
-                Cancel
-              </button>
+              <div className="edit-bio-actions"> {/* ADD THIS WRAPPER */}
+                <button className="save-bio-button" onClick={handleUpdateBio}>
+                  Save
+                </button>
+                <button className="cancel-bio-button" onClick={() => setIsEditingBio(false)}>
+                  Cancel
+                </button>
+              </div>
             </div>
-          ) : user.bio ? (
-            <p className="profile-bio">{user.bio}</p>
           ) : (
-            appUser?._id === userId && (
-              <p className="profile-bio-placeholder">
-                You don't have a bio yet. Add one to let others know more about you!
-              </p>
-            )
-          )}
-          {appUser?._id === userId && !isEditingBio && (
-            <button 
-              className="update-bio-button" 
-              onClick={() => setIsEditingBio(true)}
-            >
-              Update Bio
-            </button>
+            // Display bio or placeholder
+            <>
+              {user.bio ? (
+                <p className="profile-bio">{user.bio}</p>
+              ) : (
+                appUser?._id === userId && (
+                  <p className="profile-bio-placeholder">
+                    Add a bio to let others know more about you!
+                  </p>
+                )
+              )}
+              {/* "Update Bio" Button (only if it's the current user's profile) */}
+              {appUser?._id === userId && !isEditingBio && (
+                <button
+                  className="update-bio-button"
+                  onClick={() => {
+                    setBioInput(user.bio || ''); // Pre-fill textarea
+                    setIsEditingBio(true);
+                  }}
+                >
+                  Edit Bio
+                </button>
+              )}
+            </>
           )}
           <div className="profile-stats">
             <div className="stat">
