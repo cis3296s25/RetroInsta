@@ -79,6 +79,17 @@ const ProfilePage: React.FC<ProfileProps> = ({ appUser, userCache }) => {
     fetchProfileData();
   }, [userId]);
 
+  // close the bio editing form if the user logs out or refreshes page
+  useEffect(() => {
+    if (isEditingBio && (!appUser || appUser._id !== userId)) {
+        console.log("[ProfilePage Effect] User logged out or profile changed while editing bio. Closing editor.");
+        setIsEditingBio(false);
+        if (user) {
+           setBioInput(user.bio || '');
+        }
+    }
+  }, [appUser, userId, isEditingBio]);
+
   if (loading) {
     return <div className="profile-container">Loading profile...</div>;
   }
