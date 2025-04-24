@@ -1,0 +1,31 @@
+.following-sidebar {
+  padding: 1rem;
+  width: 250px;
+  border-left: 1px solid #ddd;
+  background-color: #fafafa;
+}
+
+.following-sidebar h3 {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.following-sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.following-user-link {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.following-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
