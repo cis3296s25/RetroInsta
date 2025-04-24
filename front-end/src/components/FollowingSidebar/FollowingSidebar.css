@@ -1,9 +1,15 @@
 .following-sidebar {
+  width: 350px; /* changes sidebar size */
   padding: 1rem;
-  width: 250px;
-  border-left: 1px solid #ddd;
+  border-left: 1px solid #ccc;
   background-color: #fafafa;
+  border-radius: 16px;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  margin-right: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
+
 
 .following-sidebar h3 {
   font-size: 1.1rem;

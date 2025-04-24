@@ -1,3 +1,4 @@
+// --- App.tsx ---
 import './App.css';
 import Navbar from "./components/Navbar/Navbar";
 import PostFeed from "./components/PostFeed/PostFeed";
@@ -30,6 +31,7 @@ function App() {
   const [googleClientId, setGoogleClientId] = useState<string | null>(null);
   const [clientIdLoading, setClientIdLoading] = useState(true);
   const [clientIdError, setClientIdError] = useState<string | null>(null);
+  const [sidebarRefreshKey, setSidebarRefreshKey] = useState(0);
   const userCache = useRef<Record<string, User>>({});
 
   const sortPostsByLikes = useCallback((posts: DisplayPost[]) => {
@@ -153,6 +155,18 @@ function App() {
     setIsCreatePostPopupOpen(prev => !prev);
   };
 
+  const refreshAppUser = useCallback(async () => {
+    if (!appUser) return;
+    try {
+      const updatedUser = await getUserById(appUser._id);
+      setAppUser(updatedUser);
+      setSidebarRefreshKey(prev => prev + 1);
+    } catch (error) {
+      console.error("Failed to refresh user:", error);
+    }
+  }, [appUser]);
+  
+
   const handleCreatePostSubmit = useCallback(async (formData: PostFormData) => {
     if (!appUser || !formData.imageFile) return alert("You must be logged in and select an image.");
     const payload: CreatePostPayload = {
@@ -195,15 +209,15 @@ function App() {
   return (
     <GoogleOAuthProvider clientId={googleClientId ?? ''}>
       <div className="App">
-        <SideBar 
-          currentUser={appUser} 
+        <SideBar
+          currentUser={appUser}
           onAddPostClick={toggleCreatePostPopup}
           onLoginSuccess={handleLoginSuccess}
           onLoginError={handleLoginError}
         />
 
         <div className="main-content">
-          <Navbar 
+          <Navbar
             user={appUser}
             authLoading={authLoading}
             onLoginSuccess={handleLoginSuccess}
@@ -214,18 +228,33 @@ function App() {
           <div className="page-layout">
             <div className="page-content">
               <Routes>
-                <Route path="/" element={<HomePage posts={posts} postsLoading={postsLoading} appUser={appUser} userCache={userCache} />} />
+                <Route path="/" element={
+                  <HomePage
+                    posts={posts}
+                    postsLoading={postsLoading}
+                    appUser={appUser}
+                    userCache={userCache}
+                    onUserUpdate={refreshAppUser}
+                  />
+                } />
+
                 <Route path="/explore" element={<ExplorePage posts={sortedPosts} postsLoading={postsLoading} appUser={appUser} userCache={userCache} />} />
                 <Route path="/profile/:userId" element={<ProfilePage appUser={appUser} userCache={userCache} />} />
               </Routes>
             </div>
 
-            {appUser && <FollowingSidebar currentUser={appUser} userCache={userCache} />}
-            
+            {appUser && (
+              <FollowingSidebar
+                key={sidebarRefreshKey}
+                currentUser={appUser}
+                userCache={userCache}
+                onUserUpdate={refreshAppUser}
+              />
+            )}
           </div>
         </div>
 
-        <CreatePostPopup 
+        <CreatePostPopup
           isOpen={isCreatePostPopupOpen}
           onClose={toggleCreatePostPopup}
           onPostSubmit={handleCreatePostSubmit}
@@ -233,7 +262,6 @@ function App() {
       </div>
     </GoogleOAuthProvider>
   );
-  
 }
 
 export default App;
