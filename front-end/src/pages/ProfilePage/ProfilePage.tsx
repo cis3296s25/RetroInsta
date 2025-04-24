@@ -21,34 +21,34 @@ const ProfilePage: React.FC<ProfileProps> = ({ appUser, userCache }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchProfileData = async () => {
-      try {
-        if (!userId) {
-          setError('No user ID provided');
-          return;
-        }
-
-        const [userData, userBackendPosts] = await Promise.all([
-          getUserById(userId),
-          getPostsByUserId(userId) 
-        ]);
-
-        setUser(userData);
-        
-        const userPosts: DisplayPost[] = userBackendPosts
-            .map(backendPost => convertBackendPostToDisplayPost(backendPost, userData))
-            .filter((post): post is DisplayPost => post !== null); // Filter out nulls if conversion failed
-        
-        setPosts(userPosts);
-      } catch (err) {
-        setError('Failed to load profile data');
-        console.error('Error fetching profile data:', err);
-      } finally {
-        setLoading(false);
+  const fetchProfileData = async () => {
+    try {
+      if (!userId) {
+        setError('No user ID provided');
+        return;
       }
-    };
 
+      const [userData, userBackendPosts] = await Promise.all([
+        getUserById(userId),
+        getPostsByUserId(userId) 
+      ]);
+
+      setUser(userData);
+      
+      const userPosts: DisplayPost[] = userBackendPosts
+          .map(backendPost => convertBackendPostToDisplayPost(backendPost, userData))
+          .filter((post): post is DisplayPost => post !== null); // Filter out nulls if conversion failed
+      
+      setPosts(userPosts);
+    } catch (err) {
+      setError('Failed to load profile data');
+      console.error('Error fetching profile data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchProfileData();
   }, [userId]);
 
@@ -80,6 +80,7 @@ const ProfilePage: React.FC<ProfileProps> = ({ appUser, userCache }) => {
             <FollowButton
               appUser={appUser}
               targetUserID={userId}
+              onFollowToggleSuccess={() => fetchProfileData()}
             />
           </div>
           {user.bio && <p className="profile-bio">{user.bio}</p>}
