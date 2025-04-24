@@ -49,15 +49,154 @@
   margin: 0;           /* Remove margin from h1 */
 }
 
-/* FollowButton component would go here in the flex row */
-
-.profile-bio {
-  font-size: 16px;
-  color: #262626;
-  margin: 0 0 20px 0; /* Keep margin below bio */
-  line-height: 1.5;
+.profile-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column; /* Keep this */
+  /* Ensure items align to the start (left) by default */
+  align-items: flex-start; /* Changed from default 'stretch' */
 }
 
+.profile-name-follow {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+  width: 100%; /* Ensure this row takes full width */
+}
+
+.profile-username {
+  font-size: 25px;
+  font-weight: 600;
+  color: #262626;
+  margin: 0; /* Keep margin reset */
+  /* Text alignment is naturally left */
+}
+
+.profile-bio,
+.profile-bio-placeholder {
+  font-size: 1rem;
+  color: #262626;
+  margin: 0 0 10px 0; /* Keep left margin 0 */
+  padding: 0; /* Ensure no extra padding */
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  text-align: left; /* Explicitly set text alignment */
+  width: 100%; /* Ensure paragraph takes full available width */
+  box-sizing: border-box; /* Include padding/border if any were added later */
+}
+
+.profile-bio-placeholder {
+  color: #8e8e8e;
+  text-align: left; /* Explicitly set text alignment */
+}
+
+/* --- Update Bio Button (when not editing) --- */
+.update-bio-button {
+  margin-top: 5px;
+  padding: 5px 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-family: inherit;
+  background-color: #efefef;
+  color: #262626;
+  border: 1px solid #dbdbdb;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-left: 0;
+}
+
+.update-bio-button:hover {
+  background-color: #dbdbdb;
+}
+
+/* --- Edit Bio Section (when editing) --- */
+.edit-bio {
+  margin-top: 10px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start; /* Align textarea and button row to the left */
+}
+
+.bio-input {
+  /* Styles remain the same, ensure width: 100% */
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 1rem;
+  font-family: inherit;
+  line-height: 1.4;
+  border: 1px solid #dbdbdb;
+  border-radius: 6px;
+  resize: vertical;
+  box-sizing: border-box;
+  background-color: #fafafa;
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.bio-input:focus {
+  outline: none;
+  border-color: #a8a8a8;
+}
+
+.edit-bio-actions {
+  display: flex; /* MUST be flex */
+  gap: 10px; /* Space between buttons */
+  width: 100%; /* Takes available width */
+  justify-content: flex-start; /* Explicitly set or rely on default */
+}
+
+/* Combine common styles for Save/Cancel buttons */
+.save-bio-button,
+.cancel-bio-button {
+  padding: 8px 16px; /* Keep existing padding */
+  font-size: 0.9rem;
+  font-family: inherit;
+  font-weight: 600;
+  border: none; /* Common: no border base */
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+  margin-right: 0; /* Remove old margin if any */
+  
+
+  /* --- Add these lines for equal width --- */
+  width: 90px; /* Adjust this value as needed for aesthetics */
+  text-align: center; /* Center the text inside the button */
+  box-sizing: border-box; /* Ensure padding is included in the width */
+}
+
+/* Specific styles for Save button */
+.save-bio-button {
+  background-color: #0095f6; /* Primary blue */
+  color: white;
+}
+
+.save-bio-button:hover {
+  background-color: #0077cc; /* Darker blue */
+}
+
+/* Specific styles for Cancel button */
+.cancel-bio-button {
+  background-color: #efefef; /* Light gray */
+  color: #262626;
+  border: 1px solid #dbdbdb; /* Add back the subtle border for Cancel */
+}
+
+.cancel-bio-button:hover {
+  background-color: #dbdbdb; /* Darker gray */
+}
+.profile-stats {
+  display: flex;
+  gap: 30px;
+  margin-top: 20px; /* Add some space above stats */
+  width: 100%; /* Ensure stats row takes full width */
+}
+
+/* ... rest of profile-stats, profile-posts styles ... */
 .profile-stats {
   display: flex;
   gap: 30px; /* Increased gap for stats */
@@ -100,27 +239,82 @@
   border-radius: 8px;
 } 
 
+/* src/pages/ProfilePage/ProfilePage.css */
+
+/* ... other styles ... */
+
 @media (max-width: 800px) {
   .profile-container {
-    max-width: 350px;
-    margin-left: 0 auto;
-    padding: 0 auto;
-    align-items: center;
+    max-width: 350px; /* Keep this */
+    margin: 0 auto; /* Keep this for centering the container */
+    padding: 10px; /* Restore some padding */
+    align-items: center; /* Keep this */
   }
+
   .profile-header {
     flex-direction: column;
     align-items: center;
+    width: 100%; /* Ensure header takes width */
   }
+
   .profile-picture {
     margin-right: 0;
+    margin-bottom: 15px; /* Add space below picture */
   }
-  .profile-bio {
-    text-align: center;
 
+  /* --- Target the username/follow container --- */
+  .profile-name-follow {
+    justify-content: center; /* Center the items (username H1 and follow button) within the flex row */
+    gap: 10px; /* Maybe reduce gap slightly on mobile */
+    /* width: 100%; <-- Already set outside media query, should be fine */
   }
+
+  .profile-username {
+     /* No specific text-align needed here if centering the container */
+     font-size: 1.5rem; /* Optional: Slightly smaller username on mobile */
+  }
+
+  .profile-info {
+    /* Ensure profile-info also aligns its content center on mobile */
+    align-items: center;
+    width: 100%; /* Ensure it takes full width */
+  }
+
+  .profile-bio,
+  .profile-bio-placeholder {
+    text-align: center; /* Keep bio centered as per your original query */
+    padding: 0 10px; /* Add horizontal padding so centered text doesn't touch edges */
+  }
+
+  .update-bio-button {
+    align-self: center; /* Center the button itself if bio isn't shown */
+  }
+
+  .edit-bio {
+    align-items: center; /* Center the textarea and button row */
+  }
+
+  .edit-bio-actions {
+     justify-content: center; /* Center the save/cancel buttons */
+  }
+
+  .profile-stats {
+    justify-content: center; /* Center the stat blocks */
+    gap: 20px; /* Adjust gap */
+    /* Remove margin-left from .stat if it was causing issues */
+  }
+
   .stat {
-    margin-left: 20px ;
-    gap: 10px;
+    margin-left: 0; /* Remove specific margin */
+    /* gap: 10px; <-- Controlled by parent .profile-stats gap */
   }
-  
-}
+
+  /* Ensure posts section is also reasonable */
+  .profile-posts {
+    width: 100%;
+  }
+  .profile-posts h2 {
+    text-align: center;
+  }
+
+} /* End of @media query */

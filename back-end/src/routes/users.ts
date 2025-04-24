@@ -114,6 +114,34 @@ router.put('/:id', async (req: Request, res: Response) => {
   }
 });
 
+// PATCH /api/users/:id/bio - update user's bio
+router.patch('/:id/bio', async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { newBio } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(id) || typeof newBio !== 'string') {
+    return res.status(400).json({ error: "Invalid user ID or bio format" });
+  }
+
+  try {
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    user.bio = newBio;
+
+    await user.save();
+
+    return res.status(200).json({ message: "User bio updated successfully" })
+  } catch (error) {
+    console.error("Error updating user bio", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// PATCH /api/users/:id/follow - follow another user
 router.patch('/:id/follow', async (req: Request, res: Response) => {
   const { id } = req.params;
   const { targetUserID } = req.body;
