@@ -1,11 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import "./PostComponent.css";
 import { DisplayPost } from "../../models/Post";
 import { User } from "../../models/User";
 import { toggleLikePost } from "../../api/posts";
 import CommentSection from "../CommentSection/CommentSection";
-import { Link } from 'react-router-dom';
-import FollowButton from "../FollowButton/FollowButton";
 
 interface PostComponentProps {
   post: DisplayPost;

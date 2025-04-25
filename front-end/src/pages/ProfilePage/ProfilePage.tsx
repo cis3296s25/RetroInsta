@@ -127,10 +127,6 @@ const ProfilePage: React.FC<ProfileProps> = ({ appUser, userCache }) => {
             <FollowButton
               appUser={appUser}
               targetUserID={userId}
-              onFollowToggleSuccess={() => {
-                fetchProfileData();
-                window.dispatchEvent(new Event("follow-update"));
-              }}
             />
           </div>
           {isEditingBio ? (
@@ -139,8 +135,8 @@ const ProfilePage: React.FC<ProfileProps> = ({ appUser, userCache }) => {
                 className="bio-input"
                 value={bioInput}
                 onChange={(e) => setBioInput(e.target.value)}
-                placeholder="Tell us about yourself..." // Updated placeholder
-                rows={4} // Suggest a reasonable number of rows
+                placeholder="Tell us about yourself..."
+                rows={4}
               />
               <div className="edit-bio-actions"> {/* ADD THIS WRAPPER */}
                 <button className="save-bio-button" onClick={handleUpdateBio}>
