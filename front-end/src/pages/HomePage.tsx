@@ -20,6 +20,11 @@ const HomePage: React.FC<HomePageProps> = ({
 }) => {
   return (
     <div className="Posts">
+
+      <h2 style={{ textAlign: 'center', marginBottom: '1rem', color: '#333' }}>
+        Your Feed
+      </h2>
+
       {postsLoading ? (
         <p>Loading posts...</p>
       ) : posts.length > 0 ? (
@@ -30,7 +35,7 @@ const HomePage: React.FC<HomePageProps> = ({
           onUserUpdate={onUserUpdate} 
         />
       ) : (
-        <p>No posts available. Be the first to create one!</p>
+        <p>Your feed is empty. Follow some users or create your first post!</p>
       )}
     </div>
   );

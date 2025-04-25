@@ -13,6 +13,10 @@ interface ExplorePageProps {
 const ExplorePage: React.FC<ExplorePageProps> = ({ posts, postsLoading, appUser, userCache }) => {
   return (
     <div className="Posts">
+
+      <h2 style={{ textAlign: 'center', marginBottom: '1rem', color: '#333' }}>
+        Explore Popular Posts
+      </h2>
       {postsLoading ? (
         <p>Loading posts...</p>
       ) : posts.length > 0 ? (
