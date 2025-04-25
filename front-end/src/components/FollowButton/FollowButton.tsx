@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { User } from '../../models/User';
-import { toggleFollowUser } from "../../api/users";
+import { toggleFollowUser, getUserById } from "../../api/users";
 import './FollowButton.css';
 
 interface FollowButtonProps {
@@ -23,26 +23,46 @@ const FollowButton: React.FC<FollowButtonProps> = ({
   );
   const [isLoading, setIsLoading] = useState(false);
 
-  // 🔁 Sync when appUser or targetUserID changes
   useEffect(() => {
     setIsFollowing(appUser.followingUserIDs.includes(targetUserID));
   }, [appUser, targetUserID]);
+
+  useEffect(() => {
+    const handleFollowChange = async () => {
+      try {
+        const refreshedUser = await getUserById(appUser._id);
+        setIsFollowing(refreshedUser.followingUserIDs.includes(targetUserID));
+      } catch (err) {
+        console.error("Failed to refresh follow state:", err);
+      }
+    };
+
+    window.addEventListener("follow-update", handleFollowChange);
+    return () => window.removeEventListener("follow-update", handleFollowChange);
+  }, [appUser._id, targetUserID]);
 
   const handleFollowClick = async () => {
     if (isLoading) return;
 
     setIsLoading(true);
     const originalState = isFollowing;
-    setIsFollowing(!originalState); 
+    setIsFollowing(!originalState);
 
     try {
       await toggleFollowUser(appUser._id, targetUserID);
+
+      const updatedUser = await getUserById(appUser._id);
+      setIsFollowing(updatedUser.followingUserIDs.includes(targetUserID));
+
+      window.dispatchEvent(new Event("follow-update"));
+
       onFollowToggleSuccess?.();
-      onUserUpdate?.(); 
+      onUserUpdate?.();
+
     } catch (error) {
       console.error("Follow/unfollow failed:", error);
       alert("Something went wrong. Please try again.");
-      setIsFollowing(originalState); 
+      setIsFollowing(originalState);
     } finally {
       setIsLoading(false);
     }
