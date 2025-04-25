@@ -42,14 +42,23 @@
 }
 
 .main-content {
-  margin-right: 300px; 
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  margin-right: 100px; 
+  padding: 20px; 
+  box-sizing: border-box;
 }
+
 
 @media screen and (max-width: 768px) {
   .main-content {
-    margin-right: 60px; 
+    margin-right: 60px;
+    padding: 10px;
+    max-width: 90%; 
   }
 }
+
 
 
 .page-layout {

@@ -16,11 +16,6 @@
   padding-right: 3rem; 
 }
 
-.follow-button-topright {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-}
 
 .avatar {
   width: 40px;

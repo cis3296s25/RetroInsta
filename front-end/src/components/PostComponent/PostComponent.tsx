@@ -66,17 +66,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
           {username}
         </a>
 
-        {appUser && author._id !== appUser._id && (
-          <div className="follow-button-topright">
-            <FollowButton
-              appUser={appUser}
-              targetUserID={author._id}
-              onUserUpdate={onUserUpdate}
-            />
-
-
-          </div>
-        )}
+        
       </div>
 
       {imagePath ? (
