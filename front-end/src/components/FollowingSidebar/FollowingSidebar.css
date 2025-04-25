@@ -1,54 +1,29 @@
 .following-sidebar {
   position: fixed;
-  top: 50px;
+  top: 60px; /* Assuming 60px navbar height */
+  height: calc(100vh - 60px); /* Use viewport height */
   right: 0;
-  width: 250px;
-  height: calc(100% - 70px); 
+  width: 250px; /* Default full width */
   background-color: #fafafa;
   border-left: 1px solid #ccc;
   padding: 1rem;
   box-shadow: -2px 0 5px rgba(0, 0, 0, 0.05);
   overflow-y: auto;
-  z-index: 1000;
+  z-index: 900; /* Adjusted z-index slightly lower than main sidebar/modals */
   transition: width 0.3s ease;
-  border-radius: 16px 0 0 16px;
-}
-
-@media screen and (max-width: 1024px) {
-  .following-sidebar {
-    width: 60px;
-    padding: 1rem 0.5rem;
-  }
-
-  .following-sidebar h3 {
-    display: none;
-  }
-
-  .following-user-item,
-  .following-user-info {
-    justify-content: center;
-  }
-
-  .following-user-link span,
-  .unfollow-button {
-    display: none;
-  }
-
-  .following-avatar {
-    width: 40px;
-    height: 40px;
-    margin: 0;
-  }
+  border-radius: 0;
 }
 
 .following-sidebar h3 {
   font-size: 1.1rem;
   margin-bottom: 0.5rem;
+  /* display: block; is default for h3 */
 }
 
 .following-sidebar ul {
   list-style: none;
   padding: 0;
+  margin: 0; /* Explicitly remove default margin */
 }
 
 .following-user-link {
@@ -56,14 +31,16 @@
   align-items: center;
   text-decoration: none;
   color: inherit;
-  flex: 1; 
+  flex: 1; /* Allow link to take space */
+  gap: 10px; /* Added gap for spacing instead of margin */
 }
 
 .following-avatar {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  margin-right: 10px;
+  /* margin-right: 10px; <-- Replaced by gap in parent */
+  flex-shrink: 0;
 }
 
 .following-user-item {
@@ -74,11 +51,20 @@
 }
 
 .following-user-info {
+  /* This container might be redundant if .following-user-item and .following-user-link handle layout */
   display: flex;
-  justify-content: space-between;
+  /* justify-content: space-between; <-- Not needed if just avatar + name */
   align-items: center;
-  width: 100%;
-  gap: 0.5rem;
+  /* width: 100%; <-- Let flexbox handle width */
+  gap: 0.5rem; /* Use gap on link instead */
+  flex-grow: 1; /* Allow user info to push button */
+}
+
+/* Select the username span specifically */
+.following-user-link span {
+  /* display: inline; is default */
+  font-weight: 500; /* Added for clarity */
+  font-size: 0.9rem; /* Added */
 }
 
 .unfollow-button {
@@ -90,9 +76,86 @@
   font-size: 0.85rem;
   transition: background-color 0.2s ease;
   white-space: nowrap;
+  /* display: inline-block; is needed if not default */
+  margin-left: 10px; /* Keep space */
+  flex-shrink: 0; /* Prevent shrinking */
+  color: initial; /* Ensure text color is default (black/dark) */
 }
 
 .unfollow-button:hover {
   background-color: blue;
 }
 
+/* Style for empty state message */
+.following-sidebar .no-following-message {
+    /* display: block; is default */
+    color: #666;
+    font-style: italic;
+    text-align: center;
+    margin-top: 2rem;
+    padding: 0 1rem;
+}
+
+/* --- STATE 2: Tablet View (Collapsing based on Sidebar width) --- */
+/* Apply changes when screen width is 1024px or less */
+@media screen and (max-width: 1024px) {
+  .following-sidebar {
+    width: 60px; /* Collapse width */
+    padding: 1rem 0.5rem; /* Adjust padding */
+    overflow-x: hidden; /* Hide horizontal overflow */
+  }
+
+  .following-sidebar h3 {
+    display: none; /* Hide heading */
+  }
+
+  /* Adjust list for centered avatars */
+  .following-sidebar ul {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .following-user-item {
+    justify-content: center; /* Center content (avatar) */
+    width: 100%;
+  }
+
+  .following-user-info {
+     justify-content: center;
+     flex-grow: 0; /* Don't grow */
+     width: auto; /* Shrink to content */
+  }
+
+  .following-user-link {
+     flex: 0; /* Don't flex */
+     gap: 0; /* Remove gap */
+     display: inline-block; /* Make it wrap avatar tightly */
+  }
+
+  .following-avatar {
+    width: 40px; /* Make avatar slightly larger */
+    height: 40px;
+    margin: 0; /* Remove margins */
+  }
+
+  .following-user-link span {
+    display: none; /* Hide username */
+  }
+
+  .unfollow-button {
+    display: none; /* Hide unfollow button */
+  }
+
+   .following-sidebar .no-following-message {
+      display: none; /* Hide empty message in collapsed view */
+   }
+}
+
+/* --- STATE 3: Mobile View (Hiding) --- */
+/* Apply additional change to hide completely when screen width is 768px or less */
+@media screen and (max-width: 768px) {
+  .following-sidebar {
+    display: none; /* Hide sidebar */
+  }
+}
