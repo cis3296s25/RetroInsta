@@ -1,4 +1,3 @@
-// --- App.tsx ---
 import './App.css';
 import Navbar from "./components/Navbar/Navbar";
 import PostFeed from "./components/PostFeed/PostFeed";

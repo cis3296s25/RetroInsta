@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  max-width: 500px;
+  max-width: 750px;
   margin: auto;
   z-index: 1000;
 }
@@ -20,7 +20,7 @@ h1 {
 }
 
 body {
-  padding-top: 20px; /* Match the height of the Navbar */
+  padding-top: 20px; 
 }
 
 @media (max-width: 800px) {

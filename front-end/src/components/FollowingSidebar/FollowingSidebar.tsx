@@ -37,7 +37,7 @@ const FollowingSidebar: React.FC<FollowingSidebarProps> = ({
     setFollowingUsers(fetchedUsers);
   };
 
-  // 🔁 Refetch when currentUser.followingUserIDs OR currentUser._id changes
+
   useEffect(() => {
     fetchFollowingUsers();
   }, [currentUser._id, currentUser.followingUserIDs.join(",")]);
@@ -48,21 +48,21 @@ const FollowingSidebar: React.FC<FollowingSidebarProps> = ({
 
   return (
     <div className="following-sidebar">
-      <h3>Following</h3>
-      <ul>
+      <h3 className="sidebar-heading">Following</h3>
+      <ul className="following-user-list">
         {followingUsers.map(user => (
           <li key={user._id} className="following-user-item">
             <div className="following-user-info">
               <Link to={`/profile/${user._id}`} className="following-user-link">
                 <img src={user.profilePicPath} alt={user.username} className="following-avatar" />
-                <span>{user.username}</span>
+                <span className="following-username">{user.username}</span>
               </Link>
               <button
                 className="unfollow-button"
                 onClick={async () => {
                   try {
                     await toggleFollowUser(currentUser._id, user._id);
-                    onUserUpdate?.(); // 🔁 Triggers appUser refresh + bumps sidebar key
+                    onUserUpdate?.();
                   } catch (err) {
                     console.error('Failed to unfollow user:', err);
                     alert('Unfollow failed');
@@ -77,6 +77,7 @@ const FollowingSidebar: React.FC<FollowingSidebarProps> = ({
       </ul>
     </div>
   );
+  
 };
 
 export default FollowingSidebar;
