@@ -22,7 +22,13 @@ h1 {
 }
 
 body {
-  padding-top: 20px; 
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Aligns the feed at the top */
+  min-height: 100vh; /* Ensures the body takes up the full height of the viewport */
+  margin: 0;
+  padding: 20px; /* Optional: Adds padding around the content */
+  box-sizing: border-box;
 }
 
 @media (max-width: 800px) {

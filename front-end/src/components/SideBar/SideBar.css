@@ -93,7 +93,7 @@
 }
 
 /* Responsive styles */
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 1024px) { /* Unified breakpoint */
     .sidebar {
         width: 60px;
         padding: 1rem 0.5rem;
@@ -112,14 +112,6 @@
 
     .sidebar-title {
         display: none;
-    }
-
-    .sidebar-item .tooltip {
-        display: block;
-    }
-
-    .sidebar-item:hover .tooltip {
-        opacity: 1;
     }
 }
 
