@@ -10,7 +10,7 @@ import FollowButton from '../../components/FollowButton/FollowButton';
 import { convertBackendPostToDisplayPost } from '../../utils/postUtils';
 
 interface ProfileProps {
-  appUser: User | null
+  appUser: User | null;
   userCache: Record<string, User>;
 }
 
@@ -34,16 +34,16 @@ const ProfilePage: React.FC<ProfileProps> = ({ appUser, userCache }) => {
 
       const [userData, userBackendPosts] = await Promise.all([
         getUserById(userId),
-        getPostsByUserId(userId) 
+        getPostsByUserId(userId)
       ]);
 
       setUser(userData);
       setBioInput(userData.bio || '');
       
       const userPosts: DisplayPost[] = userBackendPosts
-          .map(backendPost => convertBackendPostToDisplayPost(backendPost, userData))
-          .filter((post): post is DisplayPost => post !== null); // Filter out nulls if conversion failed
-      
+        .map(backendPost => convertBackendPostToDisplayPost(backendPost, userData))
+        .filter((post): post is DisplayPost => post !== null);
+
       setPosts(userPosts);
     } catch (err) {
       setError('Failed to load profile data');
@@ -78,6 +78,15 @@ const ProfilePage: React.FC<ProfileProps> = ({ appUser, userCache }) => {
   useEffect(() => {
     fetchProfileData();
   }, [userId]);
+  useEffect(() => {
+    const handleFollowChange = () => {
+      fetchProfileData(); 
+    };
+  
+    window.addEventListener("follow-update", handleFollowChange);
+    return () => window.removeEventListener("follow-update", handleFollowChange);
+  }, []);
+  
 
   // close the bio editing form if the user logs out or refreshes page
   useEffect(() => {
@@ -106,9 +115,9 @@ const ProfilePage: React.FC<ProfileProps> = ({ appUser, userCache }) => {
     <div className="profile-container">
       <div className="profile-header">
         <div className="profile-picture">
-          <img 
-            src={user.profilePicPath} 
-            alt={`${user.username}'s profile`} 
+          <img
+            src={user.profilePicPath}
+            alt={`${user.username}'s profile`}
             className="profile-avatar"
           />
         </div>
@@ -118,7 +127,10 @@ const ProfilePage: React.FC<ProfileProps> = ({ appUser, userCache }) => {
             <FollowButton
               appUser={appUser}
               targetUserID={userId}
-              onFollowToggleSuccess={() => fetchProfileData()}
+              onFollowToggleSuccess={() => {
+                fetchProfileData();
+                window.dispatchEvent(new Event("follow-update"));
+              }}
             />
           </div>
           {isEditingBio ? (

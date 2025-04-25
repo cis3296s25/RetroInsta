@@ -7,40 +7,53 @@ import './FollowingSidebar.css';
 interface FollowingSidebarProps {
   currentUser: User;
   userCache?: React.MutableRefObject<Record<string, User>>;
-  onUserUpdate?: () => void;
 }
 
 const FollowingSidebar: React.FC<FollowingSidebarProps> = ({
   currentUser,
-  userCache,
-  onUserUpdate
+  userCache
 }) => {
   const [followingUsers, setFollowingUsers] = useState<User[]>([]);
 
   const fetchFollowingUsers = async () => {
-    const fetchedUsers: User[] = [];
-
-    for (const userId of currentUser.followingUserIDs) {
-      if (userCache?.current[userId]) {
-        fetchedUsers.push(userCache.current[userId]);
-      } else {
-        try {
-          const user = await getUserById(userId);
-          if (userCache?.current) userCache.current[userId] = user;
-          fetchedUsers.push(user);
-        } catch (error) {
-          console.warn(`Failed to fetch user ${userId}`);
+    try {
+      const updatedUser = await getUserById(currentUser._id);
+      const followingIDs = updatedUser.followingUserIDs || [];
+  
+      const fetchedUsers: User[] = [];
+      for (const userId of followingIDs) {
+        if (userCache?.current[userId]) {
+          fetchedUsers.push(userCache.current[userId]);
+        } else {
+          try {
+            const user = await getUserById(userId);
+            if (userCache?.current) userCache.current[userId] = user;
+            fetchedUsers.push(user);
+          } catch (error) {
+            console.warn(`Failed to fetch user ${userId}`);
+          }
         }
       }
+  
+      setFollowingUsers(fetchedUsers);
+    } catch (err) {
+      console.error("Failed to refresh following users:", err);
     }
-
-    setFollowingUsers(fetchedUsers);
   };
-
+  
 
   useEffect(() => {
     fetchFollowingUsers();
   }, [currentUser._id, currentUser.followingUserIDs.join(",")]);
+
+  useEffect(() => {
+    const handleFollowChange = () => {
+      fetchFollowingUsers();
+    };
+
+    window.addEventListener("follow-update", handleFollowChange);
+    return () => window.removeEventListener("follow-update", handleFollowChange);
+  }, []);
 
   if (followingUsers.length === 0) {
     return <div className="following-sidebar">Not following anyone yet.</div>;
@@ -58,26 +71,27 @@ const FollowingSidebar: React.FC<FollowingSidebarProps> = ({
                 <span className="following-username">{user.username}</span>
               </Link>
               <button
-                className="unfollow-button"
-                onClick={async () => {
-                  try {
-                    await toggleFollowUser(currentUser._id, user._id);
-                    onUserUpdate?.();
-                  } catch (err) {
-                    console.error('Failed to unfollow user:', err);
-                    alert('Unfollow failed');
-                  }
-                }}
-              >
-                Unfollow
-              </button>
+  className="unfollow-button"
+  onClick={async () => {
+    try {
+      await toggleFollowUser(currentUser._id, user._id);
+
+      window.dispatchEvent(new Event("follow-update"));
+    } catch (err) {
+      console.error('Failed to unfollow user:', err);
+      alert('Unfollow failed');
+    }
+  }}
+>
+  Unfollow
+</button>
+
             </div>
           </li>
         ))}
       </ul>
     </div>
   );
-  
 };
 
 export default FollowingSidebar;
