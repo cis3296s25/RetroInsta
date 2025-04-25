@@ -1,8 +1,8 @@
 .feed {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  max-width: 750px;
+  gap: 10px;
+  max-width: 500px;
   margin: auto;
   /* z-index: 1000; */
 }
