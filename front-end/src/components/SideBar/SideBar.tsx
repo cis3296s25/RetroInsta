@@ -1,5 +1,6 @@
 import React from 'react';
 import './SideBar.css';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import HomeIcon from '@mui/icons-material/Home'; 
 import TravelExploreIcon from '@mui/icons-material/TravelExplore'; 
@@ -14,6 +15,9 @@ interface SideBarProps {
   onLoginSuccess: (idToken: string) => void;
   onLoginError: () => void;
 }
+
+// for pop up safari mobile bug fix
+const portalRoot = document.getElementById('portal-root');
 
 const SideBar: React.FC<SideBarProps> = ({ 
   currentUser, 
@@ -38,6 +42,20 @@ const SideBar: React.FC<SideBarProps> = ({
     onLoginSuccess(idToken);
     handleCloseLoginPopup();
   };
+
+  const loginPopup = (
+    <div className="login-popup-overlay" onClick={handleCloseLoginPopup}>
+      <div className="login-popup-content" onClick={e => e.stopPropagation()}>
+        <button className="close-button" onClick={handleCloseLoginPopup}>×</button>
+        <h3>Please Login</h3>
+        <p>You need to be logged in to access this feature.</p>
+        <GoogleLoginButton
+          onLoginSuccess={handleGoogleButtonSuccess}
+          onLoginError={onLoginError}
+        />
+      </div>
+    </div>
+  );
 
   return (
     <div className="sidebar">
@@ -91,18 +109,9 @@ const SideBar: React.FC<SideBarProps> = ({
         </li>
       </ul>
 
-      {showLoginPopup && (
-        <div className="login-popup-overlay" onClick={handleCloseLoginPopup}>
-          <div className="login-popup-content" onClick={e => e.stopPropagation()}>
-            <button className="close-button" onClick={handleCloseLoginPopup}>×</button>
-            <h3>Please Login</h3>
-            <p>You need to be logged in to access this feature.</p>
-            <GoogleLoginButton
-              onLoginSuccess={handleGoogleButtonSuccess}
-              onLoginError={onLoginError}
-            />
-          </div>
-        </div>
+      {showLoginPopup && portalRoot && createPortal(
+        loginPopup,
+        portalRoot
       )}
     </div>
   );
