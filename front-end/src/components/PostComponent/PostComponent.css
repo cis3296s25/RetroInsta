@@ -208,6 +208,15 @@
   transform: scale(0.98);
 }
 
+/* --- Post modal box realigning for Mobile Devices --- */
+@media (max-width: 600px) {
+  .modal-box {
+    margin-left: 60px;
+    align-items: center;
+  }
+}
+
+/* --- Modal Styles from File 2 --- */
 .modal-overlay {
   position: fixed;
   top: 0;

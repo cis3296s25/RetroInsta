@@ -67,3 +67,30 @@ export const getUserById = async (userId: string): Promise<User> => {
       throw err;
     }
 };
+
+/**
+ * Updates a user's bio.
+ * @param currentUserId - the id of the current logged in user
+ * @param newBio - the updated text of the bio 
+ */
+export const updateBio = async (currentUserId: string, newBio: string): Promise<void> => {
+  const targetUrl = `${BACKEND_URL}/api/users/${currentUserId}/bio`;
+
+  try {
+    const response = await fetch(targetUrl, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ newBio })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData?.error || 'Failed to update user bio.');
+    }
+  } catch (error) {
+    console.error('[API] Error in updating bio:', error);
+    throw error;
+  }
+};
