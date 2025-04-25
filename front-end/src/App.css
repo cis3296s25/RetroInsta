@@ -1,104 +1,94 @@
+/* ./front-end/src/App.css */
+
 #root {
-  max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-}
-
+/* --- Main Container --- */
 .main-content {
   width: 100%;
-  max-width: 500px;
-  margin: 0 auto;
-  margin-right: 100px; 
-  padding: 20px; 
   box-sizing: border-box;
+  padding-top: 70px; /* Navbar height (e.g., 60px) + 10px gap */
+  /* Base padding for mobile state (left sidebar collapsed, right hidden) */
+  padding-left: calc(60px + 1rem); /* Space for collapsed left sidebar + gap */
+  padding-right: 1rem; /* Standard edge padding */
+  padding-bottom: 2rem;
+  transition: padding-left 0.3s ease, padding-right 0.3s ease;
+  /* Ensure main content doesn't get accidentally limited */
+  max-width: none;
 }
 
-
-@media screen and (max-width: 768px) {
-  .main-content {
-    margin-right: 60px;
-    padding: 10px;
-    max-width: 90%; 
-  }
-}
-
-
-
+/* --- Layout Wrapper --- */
 .page-layout {
   display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  gap: 5rem; 
-}
-
-.page-content {
-  margin: 0 auto;
+  /* Default to starting alignment (mobile first) */
+  justify-content: flex-start;
   width: 100%;
-  max-width: 1000px; 
+  max-width: none; /* Ensure this wrapper isn't limiting width */
 }
 
-.following-sidebar {
-  width: 250px;
-  padding: 1rem;
-  border-left: 1px solid #ccc;
-  background-color: #fafafa;
-  border-radius: 16px; 
-  margin-top: 2rem;
-  margin-bottom: 2rem;
-  margin-right: 1rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  right: 10rem;
-  color:black;
+/* --- Actual Content Block --- */
+.page-content {
+  /* Takes full width of its container by default */
+  width: 100%;
+  /* Base max-width, primarily effective on tablet/mobile */
+  max-width: 800px; /* ADJUST - Set a reasonable base/tablet width */
+  box-sizing: border-box;
+  /* Align based on parent (.page-layout) */
+  margin-left: 0;
+  margin-right: 0;
 }
 
-.following-user-link {
-  display: flex;
-  align-items: center;
-  padding: 0.5rem 0;
-  text-decoration: none;
-  color: inherit;
-  border-radius: 8px;
-  transition: background-color 0.2s ease;
+
+/* --- Media Queries for Responsive Sidebar Padding & Layout --- */
+
+/* Desktop: Both sidebars full width */
+@media screen and (min-width: 1025px) {
+  .main-content {
+    /* Space for left sidebar (200px) + gap (2rem) */
+    padding-left: calc(200px + 2rem); /* Adjust sidebar width + gap */
+    /* Space for right sidebar (250px) + gap (2rem) */
+    padding-right: calc(250px + 2rem); /* Adjust sidebar width + gap */
+  }
+  .page-layout {
+    /* Center the content block within the wide padded area */
+    justify-content: center;
+  }
+   .page-content {
+     /* --- Explicitly set a WIDER max-width for desktop --- */
+     /* --- MODIFIED HERE --- */
+     max-width: 1400px; /* Increased from 1100px */
+     /* Or try: max-width: none; for full stretch */
+
+     /* Ensure margin is auto ONLY if you want centering *within* this max-width */
+     /* Since parent handles centering, these should likely stay 0 */
+     /* margin-left: auto; */
+     /* margin-right: auto; */
+   }
 }
 
-.following-user-link:hover {
-  background-color: #f0f0f0;
+/* Tablet: Both sidebars collapsed */
+@media screen and (min-width: 769px) and (max-width: 1024px) {
+  .main-content {
+    /* Space for collapsed left sidebar (60px) + gap (1rem) */
+    padding-left: calc(60px + 1rem); /* Adjust collapsed width + gap */
+    /* Space for collapsed right sidebar (60px) + gap (1rem) */
+    padding-right: calc(60px + 1rem); /* Adjust collapsed width + gap */
+  }
+   .page-layout {
+     /* Center the content block between collapsed sidebars */
+     justify-content: center;
+   }
+   .page-content {
+     /* Base max-width (e.g., 800px) applies here */
+     /* margin: 0; */ /* Keep aligned by parent */
+   }
 }
 
+/* Mobile: Right sidebar hidden, Left sidebar collapsed (Base styles already cover this) */
+/* @media screen and (max-width: 768px) { ... base styles handle this state ... } */
+
+/* Clean up any old conflicting styles below this line if they exist */
+/* For example, remove any old .main-content or .page-layout definitions */
+/* that might have different margin/padding/max-width properties. */
