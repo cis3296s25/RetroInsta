@@ -1,8 +1,8 @@
 .following-sidebar {
   position: fixed;
-  top: 40px;
+  top: 50px;
   right: 0;
-  width: 300px;
+  width: 250px;
   height: calc(100% - 70px); 
   background-color: #fafafa;
   border-left: 1px solid #ccc;
@@ -14,7 +14,7 @@
   border-radius: 16px 0 0 16px;
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 1024px) {
   .following-sidebar {
     width: 60px;
     padding: 1rem 0.5rem;
@@ -24,18 +24,12 @@
     display: none;
   }
 
-  .following-user-item {
-    justify-content: center;
-  }
-
+  .following-user-item,
   .following-user-info {
     justify-content: center;
   }
 
-  .following-user-link span {
-    display: none;
-  }
-
+  .following-user-link span,
   .unfollow-button {
     display: none;
   }
@@ -46,9 +40,6 @@
     margin: 0;
   }
 }
-
-
-
 
 .following-sidebar h3 {
   font-size: 1.1rem;

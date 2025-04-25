@@ -1,11 +1,12 @@
 .feed {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 5px;
   max-width: 750px;
   margin: auto;
   /* z-index: 1000; */
 }
+
 
 .header {
   width: 10px;
