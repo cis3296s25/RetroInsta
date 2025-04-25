@@ -135,3 +135,17 @@ export const toggleLikePost = async (postID: string, userID: string): Promise<vo
     }
 };
 
+export const fetchPersonalPosts = async (userId: string) => {
+    const res = await fetch(`${BACKEND_URL}/api/posts/personal/${userId}`);
+    console.log("Fetch personal posts response status:", res.status);
+  
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("Failed personal posts response body:", errorText);
+      throw new Error("Failed to fetch personal posts");
+    }
+  
+    const data = await res.json();
+    console.log("Personal posts parsed JSON data:", data);
+    return data;
+};

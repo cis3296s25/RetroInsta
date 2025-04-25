@@ -4,28 +4,35 @@ import { DisplayPost } from "../../models/Post";
 import { User } from "../../models/User";
 import { toggleLikePost } from "../../api/posts";
 import CommentSection from "../CommentSection/CommentSection";
-import { Link } from 'react-router-dom'; 
+import { Link } from 'react-router-dom';
+import FollowButton from "../FollowButton/FollowButton";
 
 interface PostComponentProps {
   post: DisplayPost;
   appUser: User | null;
-  userCache?:React.MutableRefObject<Record<string, User>>;
+  userCache?: React.MutableRefObject<Record<string, User>>;
+  onUserUpdate?: () => void;
 }
 
-const PostComponent: React.FC<PostComponentProps> = ({ post, appUser, userCache }) => {
+const PostComponent: React.FC<PostComponentProps> = ({
+  post,
+  appUser,
+  userCache,
+  onUserUpdate
+}) => {
+
   const { author, imagePath, description, likes: initialLikes, createdAt } = post;
   const username = author?.username || "Unknown User";
   const profilePicPath = author?.profilePicPath;
 
   const [likes, setLikes] = useState(initialLikes);
   const [isLiked, setIsLiked] = useState(
-    appUser?.likedPostIDs.includes(post._id) // initally set to whether user has liked post before
+    appUser?.likedPostIDs.includes(post._id)
   );
 
-  // Format the timestamp
   const timestamp = createdAt
-      ? new Date(createdAt).toLocaleString() // Simple formatting
-      : 'Timestamp unavailable';
+    ? new Date(createdAt).toLocaleString()
+    : 'Timestamp unavailable';
 
   const handleLike = async () => {
     if (!appUser) {
@@ -46,18 +53,20 @@ const PostComponent: React.FC<PostComponentProps> = ({ post, appUser, userCache 
 
   return (
     <div className="post">
-        <div className="post-header">
+      <div className="post-header">
         <a href={`/profile/${author?._id}`} className="avatar-link">
-          {/* Post header is a link to author's profile */}
-            {profilePicPath ? (
-              <img className="avatar" src={profilePicPath} alt={`${username}'s avatar`} />
-            ) : (
-              <div className="avatar-placeholder">👤</div> // Placeholder if no pic
-            )}
-          </a>
-          <a href={`/profile/${author?._id}`} className="username">
+          {profilePicPath ? (
+            <img className="avatar" src={profilePicPath} alt={`${username}'s avatar`} />
+          ) : (
+            <div className="avatar-placeholder">👤</div>
+          )}
+        </a>
+
+        <a href={`/profile/${author?._id}`} className="username">
           {username}
-          </a>
+        </a>
+
+        
       </div>
 
       {imagePath ? (
@@ -69,7 +78,6 @@ const PostComponent: React.FC<PostComponentProps> = ({ post, appUser, userCache 
       <div className="post-content">
         <p className="post-description">{description || ''}</p>
 
-        {/* Like & Comment Bar */}
         <div className="post-actions">
           <div className="like-section">
             <button
@@ -82,11 +90,10 @@ const PostComponent: React.FC<PostComponentProps> = ({ post, appUser, userCache 
             <span className="like-count">{likes}</span>
           </div>
 
-          {/* Comment section */}
           <CommentSection
             postID={post._id}
             currentUser={appUser}
-            userCache={userCache || { current: {} }} // Provide a default empty cache
+            userCache={userCache || { current: {} }}
             imagePath={imagePath}
           />
           <div className="timestamp">{timestamp}</div>

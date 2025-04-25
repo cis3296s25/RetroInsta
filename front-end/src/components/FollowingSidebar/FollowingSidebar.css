@@ -1,0 +1,98 @@
+.following-sidebar {
+  position: fixed;
+  top: 50px;
+  right: 0;
+  width: 250px;
+  height: calc(100% - 70px); 
+  background-color: #fafafa;
+  border-left: 1px solid #ccc;
+  padding: 1rem;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.05);
+  overflow-y: auto;
+  z-index: 1000;
+  transition: width 0.3s ease;
+  border-radius: 16px 0 0 16px;
+}
+
+@media screen and (max-width: 1024px) {
+  .following-sidebar {
+    width: 60px;
+    padding: 1rem 0.5rem;
+  }
+
+  .following-sidebar h3 {
+    display: none;
+  }
+
+  .following-user-item,
+  .following-user-info {
+    justify-content: center;
+  }
+
+  .following-user-link span,
+  .unfollow-button {
+    display: none;
+  }
+
+  .following-avatar {
+    width: 40px;
+    height: 40px;
+    margin: 0;
+  }
+}
+
+.following-sidebar h3 {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.following-sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.following-user-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+  flex: 1; 
+}
+
+.following-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.following-user-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.following-user-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 0.5rem;
+}
+
+.unfollow-button {
+  background-color: lightblue;
+  border: none;
+  border-radius: 8px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+}
+
+.unfollow-button:hover {
+  background-color: blue;
+}
+

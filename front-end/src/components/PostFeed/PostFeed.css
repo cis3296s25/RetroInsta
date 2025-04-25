@@ -1,11 +1,13 @@
 .feed {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  max-width: 500px;
-  margin: auto;
+  gap: 5px;
+  max-width: 750px;
+  margin: auto; 
   z-index: 1000;
+  padding-top: 10px;
 }
+
 
 .header {
   width: 10px;
@@ -20,7 +22,7 @@ h1 {
 }
 
 body {
-  padding-top: 60px; /* Match the height of the Navbar */
+  padding-top: 20px; 
 }
 
 @media (max-width: 800px) {
