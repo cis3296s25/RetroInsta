@@ -1,11 +1,13 @@
 .feed {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  max-width: 500px;
-  width: 100%; /* Ensures the feed is responsive */
-  margin: 0 auto; /* Centers the feed horizontally */
+  gap: 5px;
+  max-width: 750px;
+  margin: auto; 
+  z-index: 1000;
+  padding-top: 10px;
 }
+
 
 .header {
   width: 10px;

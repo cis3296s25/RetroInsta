@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { User } from '../../models/User';
-import { BackendPost, DisplayPost } from '../../models/Post';
+import { DisplayPost } from '../../models/Post';
 import { getUserById, updateBio } from '../../api/users';
-import { getAllPosts, getPostsByUserId } from '../../api/posts';
+import { getPostsByUserId } from '../../api/posts';
 import PostFeed from '../../components/PostFeed/PostFeed';
 import './ProfilePage.css';
 import FollowButton from '../../components/FollowButton/FollowButton';
