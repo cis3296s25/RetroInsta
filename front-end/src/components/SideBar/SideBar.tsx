@@ -61,7 +61,11 @@ const SideBar: React.FC<SideBarProps> = ({
     <div className="sidebar">
       <ul className="sidebar-menu">
         <li className="sidebar-item">
-          <Link to="/" className="sidebar-link">
+          <Link
+            to="/home" 
+            className="sidebar-link"
+            onClick={handleProtectedAction}
+          >
             <HomeIcon className="sidebar-icon" /> 
             <span>Home</span>
             <div className="tooltip">Home</div>
@@ -71,7 +75,6 @@ const SideBar: React.FC<SideBarProps> = ({
           <Link 
             to="/explore" 
             className="sidebar-link"
-            onClick={handleProtectedAction}
           >
             <TravelExploreIcon className="sidebar-icon" />
             <span>Explore</span>

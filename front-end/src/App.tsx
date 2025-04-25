@@ -1,6 +1,5 @@
 import './App.css';
 import Navbar from "./components/Navbar/Navbar";
-import PostFeed from "./components/PostFeed/PostFeed";
 import CreatePostPopup from "./components/CreatePostPopup/CreatePostPopup";
 import SideBar from "./components/SideBar/SideBar";
 import ProfilePage from "./pages/ProfilePage/ProfilePage";
@@ -15,48 +14,64 @@ import { User } from './models/User';
 import { createPost, getAllPosts, fetchPersonalPosts } from './api/posts';
 import { fetchGoogleClientId, loginWithGoogleApi as loginWithGoogle } from './api/auth';
 import { getUserById, getUserById as getUserDataById } from './api/users';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 
 const LOCAL_STORAGE_USER_ID_KEY = 'user_id';
 
 function App() {
-  const [posts, setPosts] = useState<DisplayPost[]>([]);
+  const [explorePosts, setExplorePosts] = useState<DisplayPost[]>([]);
+  const [personalPosts, setPersonalPosts] = useState<DisplayPost[]>([]);
   const [postsLoading, setPostsLoading] = useState(true);
   const [appUser, setAppUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(false);
   const [isCreatePostPopupOpen, setIsCreatePostPopupOpen] = useState(false);
-  const [sortedPosts, setSortedPosts] = useState<DisplayPost[]>([]);
-  const [personalPosts, setPersonalPosts] = useState<DisplayPost[]>([]);
   const [googleClientId, setGoogleClientId] = useState<string | null>(null);
   const [clientIdLoading, setClientIdLoading] = useState(true);
   const [clientIdError, setClientIdError] = useState<string | null>(null);
   const [sidebarRefreshKey, setSidebarRefreshKey] = useState(0);
   const userCache = useRef<Record<string, User>>({});
+  const navigate = useNavigate();
 
-  const sortPostsByLikes = useCallback((posts: DisplayPost[]) => {
-    return [...posts].sort((a, b) => b.likes - a.likes);
-  }, []);
+  // Helper function to process posts (avoids repetition)
+  const processBackendPosts = (
+      backendPosts: BackendPost[],
+      usersMap: Record<string, User>
+  ): DisplayPost[] => {
+      return backendPosts.map(post => {
+          const author = usersMap[post.authorID];
+          if (!author) {
+              console.warn(`[ProcessPosts] Author ${post.authorID} not found in map for post ${post._id}.`);
+              return null;
+          }
+          const { authorID, ...rest } = post;
+          return { ...rest, author };
+      }).filter((p): p is DisplayPost => p !== null);
+  };
+
 
   const fetchAndProcessPosts = useCallback(async () => {
+    console.log("[App] Fetching and processing posts...");
     setPostsLoading(true);
-    let finalPersonalPosts: DisplayPost[] = [];
+    const currentUserId = localStorage.getItem(LOCAL_STORAGE_USER_ID_KEY); // Get current user ID
+
     try {
-      const backendPosts = await getAllPosts();
+      const allBackendPosts = await getAllPosts();
+      console.log(`[App] Fetched ${allBackendPosts.length} total posts.`);
+
       const uniqueAuthorIDs = [...new Set(
-        backendPosts.map(p => p.authorID).filter((id): id is string => /^[0-9a-fA-F]{24}$/.test(id))
+        allBackendPosts.map(p => p.authorID).filter((id): id is string => /^[0-9a-fA-F]{24}$/.test(id))
       )];
 
       const idsToFetch: string[] = [];
       const usersFromCache: Record<string, User> = {};
-
       uniqueAuthorIDs.forEach(id => {
         if (userCache.current[id]) usersFromCache[id] = userCache.current[id];
         else idsToFetch.push(id);
       });
 
+      console.log(`[App] Need to fetch ${idsToFetch.length} authors for all posts.`);
       const userPromises = idsToFetch.map(id => getUserById(id).catch(() => null));
       const usersOrNulls = await Promise.all(userPromises);
-
       const fetchedUsers: Record<string, User> = {};
       usersOrNulls.forEach(user => {
         if (user) {
@@ -64,140 +79,159 @@ function App() {
           userCache.current[user._id] = user;
         }
       });
-
       const allUsersMap = { ...usersFromCache, ...fetchedUsers };
+      console.log(`[App] Total users in cache/fetched: ${Object.keys(allUsersMap).length}`);
 
-      const processedPosts = backendPosts.map(post => {
-        const author = allUsersMap[post.authorID];
-        if (!author) return null;
-        const { authorID, ...rest } = post;
-        return { ...rest, author };
-      }).filter((p): p is DisplayPost => p !== null);
+      const processedExplorePosts = processBackendPosts(allBackendPosts, allUsersMap);
 
-      const usrID = localStorage.getItem(LOCAL_STORAGE_USER_ID_KEY);
-      if (usrID) {
+      setExplorePosts(processedExplorePosts);
+      console.log(`[App] Processed ${processedExplorePosts.length} posts for Explore.`);
+
+      if (currentUserId) {
+        console.log(`[App] User ${currentUserId} is logged in. Fetching personal feed...`);
         try {
-          const personal = await fetchPersonalPosts(usrID);
-          const personalProcessed = personal.map(post => {
-            const author = allUsersMap[post.authorID];
-            if (!author) return null;
-            const { authorID, ...rest } = post;
-            return { ...rest, author };
-          }).filter((p): p is DisplayPost => p !== null);
-
-          setPersonalPosts(personalProcessed);
-          finalPersonalPosts = personalProcessed;
-        } catch {
-          setPersonalPosts([]);
+          const personalBackendPosts = await fetchPersonalPosts(currentUserId);
+          console.log(`[App] Fetched ${personalBackendPosts.length} posts for personal feed.`);
+          const processedPersonalPosts = processBackendPosts(personalBackendPosts, allUsersMap);
+          setPersonalPosts(processedPersonalPosts);
+          console.log(`[App] Processed ${processedPersonalPosts.length} posts for Home.`);
+        } catch (personalFetchError) {
+            console.error("[App] Failed to fetch personal posts:", personalFetchError);
+            setPersonalPosts([]); // clear personal posts on error
         }
       } else {
-        setPersonalPosts([]);
+        console.log("[App] User not logged in. Clearing personal feed.");
+        setPersonalPosts([]); // clear personal posts if not logged in
       }
 
-      setPosts(finalPersonalPosts.length > 0 ? finalPersonalPosts : processedPosts);
-      setSortedPosts(sortPostsByLikes(processedPosts));
     } catch (error) {
       console.error("Error fetching or processing posts:", error);
-      setPosts([]);
-      setSortedPosts([]);
+      setExplorePosts([]);
+      setPersonalPosts([]);
     } finally {
       setPostsLoading(false);
+      console.log("[App] Finished fetching and processing posts.");
     }
-  }, [sortPostsByLikes]);
+  }, []);
 
-  useEffect(() => { fetchAndProcessPosts(); }, [fetchAndProcessPosts]);
+  useEffect(() => {
+      console.log("[App] Effect triggered: Fetching posts based on user state.");
+      fetchAndProcessPosts();
+   }, [appUser, fetchAndProcessPosts]);
 
   const handleLogout = useCallback(() => {
+    console.log("[App] User logged out.");
     setAppUser(null);
+    setPersonalPosts([]);
     localStorage.removeItem(LOCAL_STORAGE_USER_ID_KEY);
-    fetchAndProcessPosts();
-  }, [fetchAndProcessPosts]);
+    
+    navigate('/explore', { replace: true });
+    console.log("[App] Navigated to /explore after logout.");
+  }, [navigate]);
 
   const handleLoginError = useCallback(() => {
+    console.error("[App] Login error occurred.");
     setAppUser(null);
-    setPosts([]);
+    setPersonalPosts([]);
+    localStorage.removeItem(LOCAL_STORAGE_USER_ID_KEY);
   }, []);
 
   const handleLoginSuccess = useCallback(async (idToken: string) => {
+    console.log("[App] Handling login success...");
     setAuthLoading(true);
     try {
       const fetchedUser = await loginWithGoogle({ idToken });
-      if (!fetchedUser._id) throw new Error("Invalid user data");
+      if (!fetchedUser?._id) throw new Error("Invalid user data received after login.");
+
       localStorage.setItem(LOCAL_STORAGE_USER_ID_KEY, fetchedUser._id);
       setAppUser(fetchedUser);
-      await fetchAndProcessPosts();
+      console.log(`[App] User ${fetchedUser.username} logged in successfully.`);
     } catch (error) {
-      console.error("Login failed:", error);
+      console.error("[App] Login failed:", error);
       handleLoginError();
     } finally {
       setAuthLoading(false);
     }
-  }, [handleLoginError, fetchAndProcessPosts]);
+  }, [handleLoginError]);
 
+  // --- Restore Session ---
   const restoreUserSession = useCallback(async () => {
     const userId = localStorage.getItem(LOCAL_STORAGE_USER_ID_KEY);
-    if (!userId) return setAppUser(null);
+    if (!userId) {
+        console.log("[App] No user ID in local storage. Setting user to null.");
+        setAppUser(null);
+        setPersonalPosts([]);
+        return;
+    }
+    console.log(`[App] Restoring user session for ID: ${userId}`);
     setAuthLoading(true);
     try {
       const user = await getUserDataById(userId);
       setAppUser(user);
-      fetchAndProcessPosts();
-    } catch {
-      localStorage.removeItem(LOCAL_STORAGE_USER_ID_KEY);
-      setAppUser(null);
+       console.log(`[App] User session restored for ${user.username}.`);
+    } catch (error) {
+        console.error("[App] Error restoring user session:", error);
+        localStorage.removeItem(LOCAL_STORAGE_USER_ID_KEY);
+        setAppUser(null);
+        setPersonalPosts([]);
     } finally {
       setAuthLoading(false);
     }
-  }, [fetchAndProcessPosts]);
+  }, []);
 
+  // --- Other Handlers ---
   const toggleCreatePostPopup = () => {
     setIsCreatePostPopupOpen(prev => !prev);
   };
 
   const refreshAppUser = useCallback(async () => {
     if (!appUser) return;
+    console.log("[App] Refreshing app user data...");
     try {
       const updatedUser = await getUserById(appUser._id);
       setAppUser(updatedUser);
       setSidebarRefreshKey(prev => prev + 1);
+      console.log("[App] App user refreshed.");
     } catch (error) {
-      console.error("Failed to refresh user:", error);
+      console.error("[App] Failed to refresh user:", error);
     }
   }, [appUser]);
-  
+
 
   const handleCreatePostSubmit = useCallback(async (formData: PostFormData) => {
-    if (!appUser || !formData.imageFile) return alert("You must be logged in and select an image.");
+    if (!appUser || !formData.imageFile) {
+        alert("You must be logged in and select an image.");
+        return;
+    }
     const payload: CreatePostPayload = {
       authorID: appUser._id,
       imageFile: formData.imageFile,
       description: formData.description || "",
     };
-    setPostsLoading(true);
+    console.log("[App] Submitting new post...");
     try {
       await createPost(payload);
+      console.log("[App] Post created successfully. Re-fetching all posts.");
       await fetchAndProcessPosts();
       setIsCreatePostPopupOpen(false);
-    } catch {
-      alert("Failed to create post.");
-    } finally {
-      setPostsLoading(false);
+    } catch (error) {
+        console.error("[App] Failed to create post:", error);
+        alert("Failed to create post.");
     }
   }, [appUser, fetchAndProcessPosts]);
 
-  useEffect(() => {
-    if (!clientIdLoading && !clientIdError) {
-      restoreUserSession();
-    }
-  }, [clientIdLoading, clientIdError, restoreUserSession]);
-
+  // --- Effects ---
+  // Load Client ID on mount
   useEffect(() => {
     const loadClientID = async () => {
+      console.log("[App] Loading Google Client ID...");
       setClientIdLoading(true);
       try {
         setGoogleClientId(await fetchGoogleClientId());
-      } catch {
-        setClientIdError("Google Login init failed.");
+         console.log("[App] Google Client ID loaded.");
+      } catch(err) {
+          console.error("[App] Failed to load Google Client ID:", err);
+          setClientIdError("Google Login initialization failed. Please try again later.");
       } finally {
         setClientIdLoading(false);
       }
@@ -205,6 +239,26 @@ function App() {
     loadClientID();
   }, []);
 
+  // Restore session once client ID is loaded
+  useEffect(() => {
+    if (!clientIdLoading && !clientIdError) {
+      console.log("[App] Client ID ready, restoring user session...");
+      restoreUserSession();
+    } else if (clientIdError) {
+       console.warn("[App] Cannot restore session due to Client ID error.");
+    }
+  }, [clientIdLoading, clientIdError, restoreUserSession]);
+
+
+  // Render Loading or Error state for Client ID
+  if (clientIdLoading) {
+      return <div>Loading Authentication...</div>;
+  }
+  if (clientIdError) {
+      return <div>Error: {clientIdError}</div>;
+  }
+
+  // --- Render App ---
   return (
     <GoogleOAuthProvider clientId={googleClientId ?? ''}>
       <div className="App">
@@ -226,20 +280,52 @@ function App() {
 
           <div className="page-layout">
             <div className="page-content">
-              <Routes>
-                <Route path="/" element={
-                  <HomePage
-                    posts={posts}
-                    postsLoading={postsLoading}
-                    appUser={appUser}
-                    userCache={userCache}
-                    onUserUpdate={refreshAppUser}
-                  />
-                } />
+              {postsLoading && !authLoading ? <p>Loading content...</p> : (
+                 <Routes>
+                    <Route path="/" element={<Navigate to="/explore" replace />} />
 
-                <Route path="/explore" element={<ExplorePage posts={sortedPosts} postsLoading={postsLoading} appUser={appUser} userCache={userCache} />} />
-                <Route path="/profile/:userId" element={<ProfilePage appUser={appUser} userCache={userCache} />} />
-              </Routes>
+                    <Route
+                       path="/explore"
+                       element={
+                          <ExplorePage
+                             posts={explorePosts}
+                             postsLoading={postsLoading}
+                             appUser={appUser}
+                             userCache={userCache}
+                          />
+                       }
+                    />
+
+                    <Route
+                       path="/home"
+                       element={
+                          appUser ? (
+                             <HomePage
+                                posts={personalPosts}
+                                postsLoading={postsLoading}
+                                appUser={appUser}
+                                userCache={userCache}
+                                onUserUpdate={refreshAppUser}
+                             />
+                          ) : (
+                             <Navigate to="/explore" replace />
+                          )
+                       }
+                    />
+
+                    <Route
+                       path="/profile/:userId"
+                       element={
+                          <ProfilePage
+                             appUser={appUser}
+                             userCache={userCache.current}
+                          />
+                       }
+                    />
+
+                    <Route path="*" element={<div>Page Not Found</div>} />
+                 </Routes>
+              )}
             </div>
 
             {appUser && (
@@ -247,7 +333,6 @@ function App() {
                 key={sidebarRefreshKey}
                 currentUser={appUser}
                 userCache={userCache}
-                onUserUpdate={refreshAppUser}
               />
             )}
           </div>

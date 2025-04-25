@@ -1,6 +1,7 @@
 import './Navbar.css';
-import GoogleLoginButton from '../GoogleLoginButton/GoogleLoginButton'; // Adjust path
+import GoogleLoginButton from '../GoogleLoginButton/GoogleLoginButton';
 import { User } from '../../models/User';
+import { Link } from 'react-router-dom';
 
 interface NavbarProps {
   user: User | null;
@@ -19,12 +20,14 @@ export default function Navbar({
   return (
     <nav className="navbar">
       <div className="navbar-logo">
-        <img 
-          src="/insta.png" 
-          alt="RetroInsta logo" 
-          style={{ height: '40px', marginRight: '8px', verticalAlign: 'middle' }} 
-        />
-        RetroInsta
+        <Link to="/explore" className="navbar-logo" style={{ textDecoration: 'none', color: 'inherit' }}>
+          <img 
+            src="/insta.png" 
+            alt="RetroInsta logo" 
+            style={{ height: '40px', marginRight: '8px', verticalAlign: 'middle' }} 
+          />
+          RetroInsta
+        </Link>
       </div>
       <ul className="navbar-links">
         { user ? (
