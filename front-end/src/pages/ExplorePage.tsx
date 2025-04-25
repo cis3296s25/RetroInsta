@@ -11,6 +11,7 @@ interface ExplorePageProps {
 }
 
 const ExplorePage: React.FC<ExplorePageProps> = ({ posts, postsLoading, appUser, userCache }) => {
+  const sortedPosts = [...posts].sort((a, b) => b.likes - a.likes);
   return (
     <div className="Posts">
 
@@ -20,7 +21,7 @@ const ExplorePage: React.FC<ExplorePageProps> = ({ posts, postsLoading, appUser,
       {postsLoading ? (
         <p>Loading posts...</p>
       ) : posts.length > 0 ? (
-        <PostFeed posts={posts} appUser={appUser} userCache={userCache} />
+        <PostFeed posts={sortedPosts} appUser={appUser} userCache={userCache} />
       ) : (
         <p>No posts available. Be the first to create one!</p>
       )}
