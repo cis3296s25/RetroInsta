@@ -185,17 +185,34 @@ function App() {
   };
 
   const refreshAppUser = useCallback(async () => {
-    if (!appUser) return;
+    const currentUserId = appUser?._id || localStorage.getItem(LOCAL_STORAGE_USER_ID_KEY);
+    if (!currentUserId) {
+        console.log("[App] refreshAppUser: No user logged in, skipping refresh.");
+        return;
+    }
     console.log("[App] Refreshing app user data...");
     try {
-      const updatedUser = await getUserById(appUser._id);
+      const updatedUser = await getUserById(currentUserId);
       setAppUser(updatedUser);
-      setSidebarRefreshKey(prev => prev + 1);
+      userCache.current[updatedUser._id] = updatedUser;
       console.log("[App] App user refreshed.");
     } catch (error) {
       console.error("[App] Failed to refresh user:", error);
     }
-  }, [appUser]);
+  }, [appUser?._id]); 
+
+  useEffect(() => {
+    const handleGlobalFollowUpdate = () => {
+      console.log("[App] Detected follow-update event. Refreshing appUser state.");
+      refreshAppUser();
+    };
+
+    window.addEventListener('follow-update', handleGlobalFollowUpdate);
+
+    return () => {
+      window.removeEventListener('follow-update', handleGlobalFollowUpdate);
+    };
+  }, [refreshAppUser]);
 
 
   const handleCreatePostSubmit = useCallback(async (formData: PostFormData) => {

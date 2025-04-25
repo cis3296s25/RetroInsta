@@ -1,69 +1,30 @@
 .following-sidebar {
   position: fixed;
-  top: 50px;
+  top: 60px; /* MUST match your Navbar height */
+  height: calc(100vh - 60px); /* Adjust top value if Navbar height changes */
   right: 0;
-  width: 250px;
-  height: calc(100% - 70px); 
-  background-color: #fafafa;
+  width: 250px; /* Default full width */
+  background-color: #fafafa; /* Or your desired background */
   border-left: 1px solid #ccc;
   padding: 1rem;
   box-shadow: -2px 0 5px rgba(0, 0, 0, 0.05);
   overflow-y: auto;
-  z-index: 1000;
+  z-index: 900; /* Ensure it's below modals but above content */
   transition: width 0.3s ease;
-  border-radius: 16px 0 0 16px;
+  color: black; /* Ensure text color is visible */
+  /* --- ADD THIS LINE --- */
+  box-sizing: border-box; /* Ensures padding/border are included in the width */
 }
-
-@media screen and (max-width: 1024px) {
-  .following-sidebar {
-    width: 60px;
-    padding: 1rem 0.5rem;
-  }
-
-  .following-sidebar h3 {
-    display: none;
-  }
-
-  .following-user-item,
-  .following-user-info {
-    justify-content: center;
-  }
-
-  .following-user-link span,
-  .unfollow-button {
-    display: none;
-  }
-
-  .following-avatar {
-    width: 40px;
-    height: 40px;
-    margin: 0;
-  }
-}
-
 .following-sidebar h3 {
   font-size: 1.1rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem; /* Added some space below heading */
+  /* display: block; is default */
 }
 
 .following-sidebar ul {
   list-style: none;
   padding: 0;
-}
-
-.following-user-link {
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-  color: inherit;
-  flex: 1; 
-}
-
-.following-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  margin-right: 10px;
+  margin: 0;
 }
 
 .following-user-item {
@@ -75,24 +36,127 @@
 
 .following-user-info {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  width: 100%;
-  gap: 0.5rem;
+  flex-grow: 1; /* Allow info to push button */
+}
+
+.following-user-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+  gap: 10px;
+  flex-grow: 1; /* Allow link part to grow */
+}
+
+.following-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover; /* Added for better image handling */
+  flex-shrink: 0;
+}
+
+.following-username { /* Explicitly target the username span if needed */
+  font-weight: 500;
+  font-size: 0.9rem;
+  white-space: nowrap; /* Prevent wrapping */
+  overflow: hidden; /* Hide overflow */
+  text-overflow: ellipsis; /* Add ellipsis if name is too long */
 }
 
 .unfollow-button {
-  background-color: lightblue;
-  border: none;
-  border-radius: 8px;
+  background-color: #e0e0e0; /* Lighter gray maybe? */
+  border: 1px solid #ccc;
+  border-radius: 4px; /* Slightly less rounded */
   padding: 4px 10px;
   cursor: pointer;
   font-size: 0.85rem;
   transition: background-color 0.2s ease;
   white-space: nowrap;
+  margin-left: 10px; /* Space between name and button */
+  flex-shrink: 0;
+  color: #333; /* Darker text */
 }
 
 .unfollow-button:hover {
-  background-color: blue;
+  background-color: #bdbdbd; /* Darker gray on hover */
 }
 
+.following-sidebar .no-following-message {
+    color: #666;
+    font-style: italic;
+    text-align: center;
+    margin-top: 2rem;
+    padding: 0 1rem;
+}
+
+/* --- STATE 2: Tablet View (Collapsing) --- */
+@media screen and (max-width: 1024px) { /* Collapse trigger point */
+  .following-sidebar {
+    width: 60px; /* Collapse width */
+    padding: 1rem 0.5rem;
+    overflow-x: hidden;
+    box-sizing: border-box; /* Keep this */
+  }
+
+  .following-sidebar h3 {
+    display: none;
+  }
+
+  .following-sidebar ul, /* Target the list */
+  .following-sidebar .following-user-list { /* Be more specific if needed */
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    /* --- ADD THIS LINE --- */
+    padding-top: 1.25rem; /* Match the top margin of the left sidebar's items */
+    /* Reset default list padding if any */
+    padding-left: 0;
+    margin: 0; /* Reset default list margin */
+  }
+
+  .following-user-item {
+    justify-content: center;
+    width: 100%;
+     /* Adjust margin if needed, but top padding on UL is better */
+    margin-bottom: 0.75rem; /* Keep vertical spacing between avatars */
+  }
+
+  .following-user-info {
+     justify-content: center;
+     flex-grow: 0;
+     width: auto;
+  }
+
+  .following-user-link {
+     flex-grow: 0; /* Don't grow link */
+     gap: 0;
+     display: inline-block; /* Center the avatar */
+  }
+
+  .following-avatar {
+    width: 40px; /* Slightly larger avatar */
+    height: 40px;
+    margin: 0;
+  }
+
+  .following-username {
+    display: none; /* Hide username */
+  }
+
+  .unfollow-button {
+    display: none; /* Hide unfollow button */
+  }
+
+   .following-sidebar .no-following-message {
+      display: none;
+   }
+}
+
+/* --- STATE 3: Mobile View (Hiding) --- */
+@media screen and (max-width: 768px) { /* Hiding trigger point */
+  .following-sidebar {
+    display: none; /* Hide sidebar completely */
+  }
+}

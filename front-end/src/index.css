@@ -24,14 +24,17 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  flex-direction: column; /* Stack content vertically */
-  justify-content: center; /* Center items vertically */
-  align-items: center;     /* Center items horizontally */
+  /* Removed flex centering from body - let App handle its width */
+  /* display: flex; */
+  /* flex-direction: column; */
+  /* justify-content: center; */
+  /* align-items: center; */
   min-width: 320px;
   min-height: 100vh;       /* Ensure full height */
-  background-color: #FAF3E0;
+  background-color: #FAF3E0; /* Keep background */
+}
 
+/* Styles for specific elements within body */
 .username{
   color: black;
 }
@@ -49,17 +52,17 @@ body {
 /* Styling for the camera icon */
 .camera-icon {
   width: 100%;  /* Ensures the image fits the container */
-  height: 100%; 
+  height: 100%;
   object-fit: contain;
 }
 
-
+/* --- MODIFIED HERE --- */
 .App {
   width: 100%;
-  max-width: 800px; /* Optional: Set max width for the content */
-  padding: 20px;
+  /* max-width: 800px; */ /* <<<<<<----- REMOVED THIS LIMIT */
+  /* padding: 20px; */ /* Padding is now handled by main-content */
   box-sizing: border-box;
-  text-align: center;  /* Center text horizontally */
+  /* text-align: center; */ /* Centering handled by page-layout/page-content */
 }
 
 h1 {
@@ -100,12 +103,16 @@ textarea {
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
-    background-color: #ffffff;
+    background-color: #ffffff; /* Base background */
   }
   a:hover {
     color: #747bff;
   }
   button {
-    background-color: #f9f9f9;
+    background-color: #f9f9f9; /* Light mode button background */
+  }
+  /* Ensure body background override for light mode if needed */
+  body {
+     background-color: #FAF3E0; /* Or #ffffff if you prefer pure white for light */
   }
 }
